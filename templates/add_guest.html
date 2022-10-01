@@ -1,0 +1,25 @@
+{% from 'bootstrap5/form.html' import render_form %}
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{ _('Create Guest') }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>
+    <h3>{{ _('ExpressGuest') }}</h3>
+
+
+{{ render_form(quick_guest, button_map={'one_day': 'primary', 'three_days': 'primary', 'five_days': 'primary', 'seven_days': 'secondary', 'fourteen_days': 'secondary', 'thirty_days': 'danger'}) }}
+</p>
+<p>
+    &nbsp;
+</p>
+<p>
+    <h3>{{ _('Create Guest') }}</h3>
+
+
+{{ render_form(form, button_size='block') }}
+</p>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% from 'bootstrap5/form.html' import render_form %}
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{ _('Add Employee') }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>
+    &nbsp;
+</p>
+<p>
+    <h3>{{ _('Add Employee') }}</h3>
+
+
+{{ render_form(form, button_size='block') }}
+</p>
+{% endblock %}

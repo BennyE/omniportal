@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Index{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<h1><img height="50px" src="{{ url_for('static', filename='al_enterprise_bk_50mm.png') }}"></img> - OmniPortal</h1>
+{% if g.user %}
+<h3>{{ _('Welcome') + ', ' + g.user + '! ' + _('You can now use the above functions!') }}</h3>
+{% else %}
+<h3>{{ _('Log In to get started!') }}</h3>
+{% endif %}
+
+{% endblock %}

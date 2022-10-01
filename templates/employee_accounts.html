@@ -1,0 +1,41 @@
+{% from 'bootstrap5/table.html' import render_table %}
+{% from 'bootstrap5/utils.html' import render_icon %}
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{ _('Employee Accounts') }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>
+{{ _('Employee Accounts') }}
+</p>
+
+<table class="table">
+    <tr>
+        {% for title in titles %}
+        <th>{{ title[1] }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data %}
+    <tr>
+        <td>{{ row['username'] }}</td>
+        <td>{{ row['email'] }}</td>
+        <td>{{ row['telephone'] }}</td>
+        <td>{{ row['status'] }}</td>
+        <td>{{ row['dateOfEffective']|timestamp_to_date }}</td>
+        <td>
+            {{ render_icon('eye-fill') }}
+            &nbsp;
+            {{ render_icon('pencil-square') }}
+            &nbsp;
+            {{ render_icon('trash-fill') }}
+            &nbsp;
+            {{ render_icon('shield-exclamation') }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
