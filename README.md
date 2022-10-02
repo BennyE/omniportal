@@ -16,6 +16,7 @@ This is work-in-progress, so expect rough edges! **I strongly recommend to work 
 - You'll want to update your **app.secret_key** before you do anything else
 - Navigate to 127.0.0.1:5001 (you don't want to run **debug** if outside of development phase)
 - Attempt to login with admin/admin123, the attempt will fail and inform you that "admin/admin123" account was created in **omniportal_users.json**
+- Navigate to /admin and do your settings
 - Change your password! Please don't use something valuable, as the **omniportal_users.json** stores this unencrypted (as of now)!
 
 ## i18n
