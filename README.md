@@ -42,3 +42,8 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 4. Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
 5. The code could need some structuring into multiple files
 6. Possibly it would make sense to move to sqlite instead of JSON files, to be evaluated later
+
+## Screenshot
+
+![omniportal](https://user-images.githubusercontent.com/5174414/193449734-003135ea-279c-47f2-be88-0051321efc74.png)
+
