@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "-m flask --app omniportal --host 0.0.0.0 --port 5000" ]
+CMD [ "python", "-m flask --app omniportal run --host 0.0.0.0 --port 5000" ]
