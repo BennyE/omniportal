@@ -13,13 +13,38 @@ import time
 import datetime
 import random
 import string
+import os
+import sys
 
 app = Flask(__name__)
 
-# ! READ THIS: SECURITY RELEVANT !
-# This needs to be updated on each deployment!
-# e.g. python3 -c 'import secrets; print(secrets.token_hex())'
-app.secret_key = b"d2e98837ad8605ab17f0c61fabff97567338bb0a1f6ffbeb2328bdb94d35df1c"
+# Paths
+op_secret_key = "conf/omniportal_secret_key.json"
+op_userfile = "conf/omniportal_users.json"
+op_settingsfile = "conf/omniportal_settings.json"
+
+# Try to load a secret token, if it doesn't exist create it.
+# This secures cookies and makes them unique to this installation.
+try:
+    with open(op_secret_key, "r") as secret_key_fh:
+        token = json.loads(secret_key_fh.read())
+except json.decoder.JSONDecodeError:
+    with open(op_secret_key, "w") as secret_key_fh:
+        import secrets
+        token = {"token": secrets.token_hex()}
+        secret_key_fh.write(json.dumps(token))
+        os.chmod(op_secret_key, 0o600)
+except FileNotFoundError:
+    with open(op_secret_key, "w") as secret_key_fh:
+        import secrets
+        token = {"token": secrets.token_hex()}
+        secret_key_fh.write(json.dumps(token))
+        os.chmod(op_secret_key, 0o600)
+except PermissionError:
+    sys.exit(f"Permission denied to read/write {op_secret_key}")
+
+secret_key_fh.close()
+app.secret_key = token["token"]
 
 # i18n - Translation to other languages
 babel = Babel(app) 
@@ -145,9 +170,8 @@ def login_required(view):
     return wrapped_view
 
 def get_usernames():
-    # TODO: Fix for /flash/python ...
     try:
-        with open("omniportal_users.json", "r") as op_users:
+        with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
             choices = []
             for user in users.keys():
@@ -157,65 +181,84 @@ def get_usernames():
         pass
 
 def create_default_op_users():
-    # TODO: Fix for /flash/python ...
-    with open("omniportal_users.json", "w") as op_users:
+    with open(op_userfile, "w") as op_users:
         default_user = {}
         default_user["admin"] = {"password":"admin123", "entitlement":"admin"}
         op_users.write(json.dumps(default_user))
+        os.chmod(op_userfile, 0o600)
 
 def create_op_user(new_user, password, entitlement):
-    # TODO: Fix for /flash/python ...
-    with open("omniportal_users.json", "r") as op_users:
+    with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
         if new_user in users.keys():
             return False
-    with open("omniportal_users.json", "w") as op_users:
+    with open(op_userfile, "w") as op_users:
         users[new_user] = {"password":password, "entitlement":entitlement}
         op_users.write(json.dumps(users))
         return True
 
 def remove_op_user(username):
-    # TODO: Fix for /flash/python ...
-    with open("omniportal_users.json", "r") as op_users:
+    with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
         if username == g.user:
             return False
         elif username not in users.keys():
             return False
-    with open("omniportal_users.json", "w") as op_users:
+    with open(op_userfile, "w") as op_users:
         users.pop(username)
         op_users.write(json.dumps(users))
         return True
 
 def change_op_password(username, password, new_password):
-    # TODO: Fix for /flash/python ...
-    with open("omniportal_users.json", "r") as op_users:
+    with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
         if users[username]["password"] != password:
             return False
-    with open("omniportal_users.json", "w") as op_users:
+    with open(op_userfile, "w") as op_users:
         users[username]["password"] = new_password
         op_users.write(json.dumps(users))
         return True
 
-def read_settings():
-    # TODO: Fix for /flash/python ...
+def create_default_op_settings():
     try:
-        with open("omniportal_settings.json", "r") as settings:
+        with open(op_settingsfile, "w") as settings_fh:
+            default_settings = {
+                "guest_operator_url": "https://ov2500-upam-cportal.al-enterprise.com", 
+                "guest_operator_username": "", 
+                "guest_operator_password": "", 
+                "guest_prefix": "guest", 
+                "wifi_network": "", 
+                "ale_rainbow_webhook": "", 
+                "ringcentral_webhook": "", 
+                "ms_teams_webhook": "", 
+                "ove_ovc_url": "", 
+                "validate_ove_ovc_cert": "no", 
+                "ove_ovc_api_key": ""
+            }
+            settings_fh.write(json.dumps(default_settings))
+            os.chmod(op_settingsfile, 0o600)
+    except PermissionError:
+        sys.exit(f"Permission denied to read/write {op_settingsfile}")
+    return default_settings
+
+def read_settings():
+    try:
+        with open(op_settingsfile, "r") as settings:
             setting = json.loads(settings.read())
             if setting["validate_ove_ovc_cert"] == "yes":
                 setting["check_certs"] = True
             else:
                 setting["check_certs"] = False
     except json.decoder.JSONDecodeError:
-        pass
+        setting = create_default_op_settings()
+    except FileNotFoundError:
+        setting = create_default_op_settings()
     return setting
 
 def save_settings(guest_operator_url, guest_operator_username, guest_operator_password, guest_prefix, wifi_network,
                     ale_rainbow_webhook, ringcentral_webhook, ms_teams_webhook, ove_ovc_url, validate_ove_ovc_cert,
                     ove_ovc_api_key):
-    # TODO: Fix for /flash/python ...
-    with open("omniportal_settings.json", "w") as settings:
+    with open(op_settingsfile, "w") as settings:
         setting = {}
         setting["guest_operator_url"] = guest_operator_url.rstrip("/")
         setting["guest_operator_username"] = guest_operator_username
@@ -233,8 +276,7 @@ def save_settings(guest_operator_url, guest_operator_username, guest_operator_pa
 
 def valid_login(username, password):
     try:
-        # TODO: Fix for /flash/python ...
-        with open("omniportal_users.json", "r") as op_users:
+        with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
             for user, values in users.items():
                 if user == username and password == values["password"]:
@@ -245,9 +287,8 @@ def valid_login(username, password):
         return False
 
 def log_the_user_in(username):
-    # TODO: Fix for /flash/python ...
     try:
-        with open("omniportal_users.json", "r") as op_users:
+        with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
     except FileNotFoundError:
         pass
