@@ -34,7 +34,7 @@ spec:
         readinessProbe:
           httpGet:
             #scheme: https
-            path: /index
+            path: /
             port: 5000
       volumes:
       - name: conf
