@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omniportal
+  labels:
+    app: omniportal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omniportal
+  template:
+    metadata:
+      labels:
+        app: omniportal
+    spec:
+      containers:
+      - name: omniportal
+        image: quay.io/bennye_hh/omniportal:latest
+        #command: [ "./entrypoint.sh" ]
+        # ENABLE ONLY IF YOU WANT TO RUN IN DEBUG MODE
+        #env:
+        # - name: EXTRA_OPTIONS
+        #   value: "--debug"
+        volumeMounts:
+        - mountPath: /usr/src/app/conf/
+          name: conf
+        ports:
+        - name: http
+          containerPort: 5000
+        # - name: https
+        #   containerPort: 8443
+        readinessProbe:
+          httpGet:
+            #scheme: https
+            path: /index
+            port: 5000
+      volumes:
+      - name: conf
+        persistentVolumeClaim:
+          claimName: omniportal
