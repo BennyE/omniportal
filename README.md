@@ -1,5 +1,6 @@
 
 [![Docker Repository on Quay](https://quay.io/repository/bennye_hh/omniportal/status "Docker Repository on Quay")](https://quay.io/repository/bennye_hh/omniportal)
+![github](https://github.com/BennyE/omniportal/actions/workflows/build.yml/badge.svg)
 
 # OmniPortal
 
@@ -86,6 +87,12 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 
 1. Create app.secret_key, omniportal_users & omniportal_settings automatically if those don't exist and store in conf directory
 2. Dockerfile & Quay.io (Thanks to https://github.com/dgo19 for the help!)
+
+## Supported architectures for container images
+
+1. AMD64
+2. armv7
+3. arm64
 
 ## Screenshot
 
