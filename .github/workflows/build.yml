@@ -2,15 +2,17 @@ name: Build
 
 # Controls when the workflow will run
 on:
-  #workflow_dispatch
+  # Probably for manual container image creation.
+  #workflow_dispatch: []
   push:
-    branches:
-      - 'kubernetes'
+    # I only want to build when there is a new tag
+    #branches:
+    #  - 'kubernetes'
     tags:
       - 'v*.*.*'
-  pull_request:
-    branches:
-      - 'kubernetes'
+  #pull_request:
+  #  branches:
+  #    - 'kubernetes'
 
 # permissions are needed if pushing to ghcr.io
 permissions: 
@@ -52,7 +54,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
+          #  type=sha
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
