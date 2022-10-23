@@ -1,6 +1,6 @@
 
 [![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/build.yml/badge.svg)](https://github.com/BennyE/omniportal)
-[![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/development.yml/badge.svg)](https://github.com/BennyE/omniportal)
+[![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/development.yml/badge.svg?branch=dev)](https://github.com/BennyE/omniportal)
 [![Badge](https://img.shields.io/badge/amd64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
 [![Badge](https://img.shields.io/badge/arm-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
 [![Badge](https://img.shields.io/badge/arm64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
