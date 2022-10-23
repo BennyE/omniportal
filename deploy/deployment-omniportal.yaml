@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: omniportal
-        image: quay.io/bennye_hh/omniportal:0.0.3
+        image: quay.io/bennye_hh/omniportal:0.0.4
         #command: [ "./entrypoint.sh" ]
         # ENABLE ONLY IF YOU WANT TO RUN IN DEBUG MODE
         #env:

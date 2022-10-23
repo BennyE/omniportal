@@ -284,6 +284,7 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 12. Integrate with Grafana/Prometheus
 13. ~~Update Dockerfile to do `apt update`, `apt dist-upgrade` & `apt clean` to collect latest updates~~ **DONE >= v0.0.3**
 14. ~~Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest~~ **DONE >= v0.0.3** 
+15. ~~Switch to Python v3.9 Alpine Linux image to make the security scanner of Quay.io happy~~ **DONE >= v0.0.4**
 
 ## Screenshot
 

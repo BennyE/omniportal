@@ -1,6 +1,4 @@
-FROM docker.io/library/python:3-slim-bullseye
-
-RUN apt update && apt dist-upgrade -y && apt clean
+FROM docker.io/library/python:3.9-alpine
 
 WORKDIR /usr/src/app
 
