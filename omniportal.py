@@ -15,6 +15,7 @@ import random
 import string
 import os
 import sys
+import bcrypt
 
 app = Flask(__name__)
 
@@ -180,12 +181,41 @@ def get_usernames():
     except json.decoder.JSONDecodeError:
         pass
 
+def check_for_undesireable_words(input):
+    # You may need to adapt this to your local language
+    undesireable_words = ["cunt", "pussy", "nigger", "penis", "fotze", "hitler", "fuck"]
+
+    for uw in undesireable_words:
+        if uw in input.lower():
+            return True
+    return False
+
+def generate_admin_password():
+    # Doesn't contain "l", "I", "O", "0" and "1" on purpose to avoid mistyping, thx Michael
+    letters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghijkmnopqrstuvwxyz"
+    try:
+        r = random.SystemRandom()
+    except NotImplementedError as nie:
+        print(nie)
+        flash(_("Your system doesn't provide a secure random generator!"))
+        return False
+
+    # Generate a reasonable secure random password for Admin Accounts
+    random_password = "".join(r.choice(letters) for _ in range(16))
+    
+    while check_for_undesireable_words(random_password):
+        print("Found an undesireable word in password string, generating new one!")
+        random_password = "".join(r.choice(letters) for _ in range(16))
+    return random_password
+
 def create_default_op_users():
     with open(op_userfile, "w") as op_users:
         default_user = {}
-        default_user["admin"] = {"password":"admin123", "entitlement":"admin"}
+        random_password = generate_admin_password()
+        default_user["admin"] = {"password":bcrypt.hashpw(random_password.encode(), bcrypt.gensalt()).decode(), "entitlement":"admin"}
         op_users.write(json.dumps(default_user))
         os.chmod(op_userfile, 0o600)
+    return random_password
 
 def create_op_user(new_user, password, entitlement):
     with open(op_userfile, "r") as op_users:
@@ -193,7 +223,7 @@ def create_op_user(new_user, password, entitlement):
         if new_user in users.keys():
             return False
     with open(op_userfile, "w") as op_users:
-        users[new_user] = {"password":password, "entitlement":entitlement}
+        users[new_user] = {"password":bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(), "entitlement":entitlement}
         op_users.write(json.dumps(users))
         return True
 
@@ -212,10 +242,10 @@ def remove_op_user(username):
 def change_op_password(username, password, new_password):
     with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
-        if users[username]["password"] != password:
+        if not bcrypt.checkpw(password.encode(), users[username]["password"].encode()):
             return False
     with open(op_userfile, "w") as op_users:
-        users[username]["password"] = new_password
+        users[username]["password"] = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
         op_users.write(json.dumps(users))
         return True
 
@@ -279,11 +309,11 @@ def valid_login(username, password):
         with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
             for user, values in users.items():
-                if user == username and password == values["password"]:
+                if user == username and bcrypt.checkpw(password.encode(), values["password"].encode()):
                     return True
     except FileNotFoundError:
-        create_default_op_users()
-        flash(_('Default credentials created: admin/admin123 to login!'), 'success')
+        random_password = create_default_op_users()
+        flash(_(f'Default credentials created: admin/{random_password} to login!'), 'success')
         return False
 
 def log_the_user_in(username):
