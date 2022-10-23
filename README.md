@@ -282,7 +282,8 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 10. ~~Setup fully automated GitHub Actions Workflow for multi-architecture container images~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
 11. Store OmniPortal passwords only as a hash
 12. Integrate with Grafana/Prometheus
-13. `apt update`, `apt dist-upgrade` & `apt clean` in container image to collect latest updates
+13. ~~Update Dockerfile to do `apt update`, `apt dist-upgrade` & `apt clean` to collect latest updates~~ **DONE >= v0.0.3**
+14. ~~Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest~~ **DONE >= v0.0.3** 
 
 ## Screenshot
 
