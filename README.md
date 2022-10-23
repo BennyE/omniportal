@@ -1,6 +1,8 @@
 
-[![Docker Repository on Quay](https://quay.io/repository/bennye_hh/omniportal/status "Docker Repository on Quay")](https://quay.io/repository/bennye_hh/omniportal)
-![github](https://github.com/BennyE/omniportal/actions/workflows/build.yml/badge.svg)
+[![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/build.yml/badge.svg)](https://github.com/BennyE/omniportal)
+[![Badge](https://img.shields.io/badge/amd64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
+[![Badge](https://img.shields.io/badge/arm-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
+[![Badge](https://img.shields.io/badge/arm64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
 
 # OmniPortal
 
@@ -58,6 +60,198 @@ You'll find the files that store the configuration/settings in **/home/$USER/omn
 
 `sudo docker stop omniportal`
 
+### Run OmniPortal in Rancher Desktop / k3s / k8s
+
+You are able to run OmniPortal on your favorite flavour of kubernetes. The following outputs are taken from my Rancher Desktop on Apple MBP with Apple Silicon.
+The container images are available for `amd64`, `arm` & `arm64` from: ![quay.io/bennye_hh/omniportal](https://quay.io/bennye_hh/omniportal)
+
+#### kubectl get nodes
+
+```
+benny@Bennys-MacBook-Pro ~ % kubectl get nodes
+NAME                   STATUS   ROLES                  AGE   VERSION
+lima-rancher-desktop   Ready    control-plane,master   66m   v1.24.6+k3s1
+```
+
+#### kubectl get pods -A
+
+```
+benny@Bennys-MacBook-Pro ~ % kubectl get pods -A
+NAMESPACE     NAME                                      READY   STATUS      RESTARTS   AGE
+kube-system   svclb-traefik-748d5f86-hbw84              2/2     Running     0          66m
+kube-system   helm-install-traefik-crd-877ks            0/1     Completed   0          66m
+kube-system   helm-install-traefik-xg99r                0/1     Completed   0          66m
+kube-system   coredns-b96499967-msv6t                   1/1     Running     0          66m
+kube-system   traefik-7cd4fcff68-lbsjg                  1/1     Running     0          66m
+kube-system   metrics-server-668d979685-26zrm           1/1     Running     0          66m
+kube-system   local-path-provisioner-7b7dc8d6f5-dwjbb   1/1     Running     0          66m
+```
+
+#### kubectl get sc
+
+```
+benny@Bennys-MacBook-Pro ~ % kubectl get sc
+NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  66m
+```
+
+#### Change directory to OmniPortal deploy directory
+
+Change directory to where you cloned/downloaded the OmniPortal deploy `.yaml` files. 
+```
+benny@Bennys-MacBook-Pro ~ % cd python/omniportal/deploy
+```
+
+#### Review/Update ingress-omniportal.yaml 
+
+Adapt `ingress-omniportal.yaml` to your needs. If you run Rancher Desktop, you can access the OmniPortal at `http(s)://omniportal.127.0.0.1.sslip.io`.
+Note that the HTTPS/TLS certificate is the default certificate coming with Traefik and will throw an error message in your browser.
+
+```
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  name: ingress-omniportal
+spec:
+  rules:
+  - host: omniportal.127.0.0.1.sslip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: omniportal
+            port:
+              number: 5000
+
+```
+
+#### kubectl apply --dry-run=client -o yaml -k . --validate=true
+
+After you adapted the configuration to your needs, validate before deployment.
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl apply --dry-run=client -o yaml -k . --validate=true
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{},"name":"omniportal"},"spec":{}}
+    creationTimestamp: "2022-10-22T12:08:34Z"
+    labels:
+      kubernetes.io/metadata.name: omniportal
+    name: omniportal
+# ... a lot more output    
+```
+
+#### kubectl apply -k . 
+
+Assuming that everything went fine, we deploy OmniPortal now.
+```
+benny@Bennys-MacBook-Pro deploy % kubectl apply -k .                                         
+namespace/omniportal created
+service/omniportal created
+persistentvolumeclaim/omniportal created
+deployment.apps/omniportal created
+ingress.networking.k8s.io/ingress-omniportal created
+```
+
+### What if OmniPortal doesn't work in Rancher Desktop?
+
+#### Readiness probe failed
+
+Synopsis: OmniPortal not available
+
+Reason: Readiness probe failed
+
+Solution: Fixed in >= v0.0.2
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+omniportal-69d887b7b7-rzb6g   0/1     Running   0          26s
+```
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get events
+LAST SEEN   TYPE      REASON                  OBJECT                             MESSAGE
+67s         Normal    WaitForFirstConsumer    persistentvolumeclaim/omniportal   waiting for first consumer to be created before binding
+67s         Normal    ScalingReplicaSet       deployment/omniportal              Scaled up replica set omniportal-69d887b7b7 to 1
+67s         Normal    SuccessfulCreate        replicaset/omniportal-69d887b7b7   Created pod: omniportal-69d887b7b7-rzb6g
+67s         Normal    ExternalProvisioning    persistentvolumeclaim/omniportal   waiting for a volume to be created, either by external provisioner "rancher.io/local-path" or manually created by system administrator
+67s         Normal    Provisioning            persistentvolumeclaim/omniportal   External provisioner is provisioning volume for claim "omniportal/omniportal"
+64s         Normal    ProvisioningSucceeded   persistentvolumeclaim/omniportal   Successfully provisioned volume pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112
+62s         Normal    Scheduled               pod/omniportal-69d887b7b7-rzb6g    Successfully assigned omniportal/omniportal-69d887b7b7-rzb6g to lima-rancher-desktop
+62s         Normal    Pulling                 pod/omniportal-69d887b7b7-rzb6g    Pulling image "quay.io/bennye_hh/omniportal:latest"
+53s         Normal    Pulled                  pod/omniportal-69d887b7b7-rzb6g    Successfully pulled image "quay.io/bennye_hh/omniportal:latest" in 9.649704921s
+53s         Normal    Created                 pod/omniportal-69d887b7b7-rzb6g    Created container omniportal
+53s         Normal    Started                 pod/omniportal-69d887b7b7-rzb6g    Started container omniportal
+2s          Warning   Unhealthy               pod/omniportal-69d887b7b7-rzb6g    Readiness probe failed: HTTP probe failed with statuscode: 404
+```
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal exec -it omniportal-69d887b7b7-rzb6g -- bash
+root@omniportal-69d887b7b7-rzb6g:/usr/src/app# 
+```
+
+(In the meantime I fixed the path for the readiness probe in `deployment-omniportal.yaml`)
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl apply -k .                                                
+namespace/omniportal unchanged
+service/omniportal unchanged
+persistentvolumeclaim/omniportal unchanged
+deployment.apps/omniportal configured
+ingress.networking.k8s.io/ingress-omniportal unchanged
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get deployment                              
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+omniportal   1/1     1            1           9m37s
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get pods      
+NAME                          READY   STATUS        RESTARTS   AGE
+omniportal-57f97c5f4f-lsg95   1/1     Running       0          20s
+omniportal-69d887b7b7-rzb6g   0/1     Terminating   0          9m46s
+```
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal describe node lima-rancher-desktop
+Name:               lima-rancher-desktop
+Roles:              control-plane,master
+```
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get ingress   
+NAME                 CLASS    HOSTS                           ADDRESS          PORTS   AGE
+ingress-omniportal   <none>   omniportal.127.0.0.1.sslip.io   192.168.11.197   80      4h40m
+```
+
+#### Delete/Access configuration from persistent volume (pv) in Rancher Desktop
+
+OmniPortal uses a local-path storage class. In Rancher Desktop this can be found **inside** the `lima-rancher-desktop` VM.
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl get pv    
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                   STORAGECLASS   REASON   AGE
+pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112   500Mi      RWO            Delete           Bound    omniportal/omniportal   local-path              4h51m
+```
+
+```
+benny@Bennys-MacBook-Pro % rdctl shell 
+lima-rancher-desktop$ sudo su -
+lima-rancher-desktop:~# cd /var/lib/rancher/k3s/storage
+lima-rancher-desktop:/var/lib/rancher/k3s/storage# ls
+pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal
+lima-rancher-desktop:/var/lib/rancher/k3s/storage# cd pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal/
+lima-rancher-desktop:/var/lib/rancher/k3s/storage/pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal# ls
+omniportal_secret_key.json  omniportal_users.json
+```
+
 ## i18n
 
 Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **translations/es/LC_MESSAGES**
@@ -74,7 +268,7 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 
 `.venv/bin/pybabel compile -d translations`
 
-## TODO
+## TODO & Ideas to be evaluated
 
 1. "Guest" and "Admin"-role are the two only roles taken into account so far
 2. There is no logic yet that handles "running on OmniSwitch with AOS R8"
@@ -82,19 +276,14 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 4. Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
 5. The code could need some structuring into multiple files
 6. Possibly it would make sense to move to sqlite instead of JSON files, to be evaluated later
-
-## Recent Changes
-
-1. Create app.secret_key, omniportal_users & omniportal_settings automatically if those don't exist and store in conf directory
-2. Dockerfile & Quay.io (Thanks to https://github.com/dgo19 for the help!)
-
-## Supported architectures for container images
-
-1. AMD64
-2. armv7
-3. arm64
+7. ~~Create app.secret_key, omniportal_users & omniportal_settings automatically if those don't exist and store in conf directory~~ **DONE >= v0.0.2**
+8. ~~Create Dockerfile & distribute via Quay.io~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
+9. ~~Figure out how to setup & deploy OmniPortal to Rancher Desktop (k3s/k8s)~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
+10. ~~Setup fully automated GitHub Actions Workflow for multi-architecture container images~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
+11. Store OmniPortal passwords only as a hash
+12. Integrate with Grafana/Prometheus
+13. `apt update`, `apt dist-upgrade` & `apt clean` in container image to collect latest updates
 
 ## Screenshot
 
 ![omniportal](https://user-images.githubusercontent.com/5174414/193449734-003135ea-279c-47f2-be88-0051321efc74.png)
-
