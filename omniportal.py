@@ -15,7 +15,7 @@ import random
 import string
 import os
 import sys
-import bcrypt
+from passlib.hash import pbkdf2_sha256
 
 app = Flask(__name__)
 
@@ -212,7 +212,7 @@ def create_default_op_users():
     with open(op_userfile, "w") as op_users:
         default_user = {}
         random_password = generate_admin_password()
-        default_user["admin"] = {"password":bcrypt.hashpw(random_password.encode(), bcrypt.gensalt()).decode(), "entitlement":"admin"}
+        default_user["admin"] = {"password":pbkdf2_sha256.hash(random_password), "entitlement":"admin"}
         op_users.write(json.dumps(default_user))
         os.chmod(op_userfile, 0o600)
     return random_password
@@ -223,7 +223,7 @@ def create_op_user(new_user, password, entitlement):
         if new_user in users.keys():
             return False
     with open(op_userfile, "w") as op_users:
-        users[new_user] = {"password":bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(), "entitlement":entitlement}
+        users[new_user] = {"password":pbkdf2_sha256.hash(password), "entitlement":entitlement}
         op_users.write(json.dumps(users))
         return True
 
@@ -242,10 +242,10 @@ def remove_op_user(username):
 def change_op_password(username, password, new_password):
     with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
-        if not bcrypt.checkpw(password.encode(), users[username]["password"].encode()):
+        if not pbkdf2_sha256.verify(password, users[username]["password"]):
             return False
     with open(op_userfile, "w") as op_users:
-        users[username]["password"] = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+        users[username]["password"] = pbkdf2_sha256.hash(new_password)
         op_users.write(json.dumps(users))
         return True
 
@@ -309,7 +309,7 @@ def valid_login(username, password):
         with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
             for user, values in users.items():
-                if user == username and bcrypt.checkpw(password.encode(), values["password"].encode()):
+                if user == username and pbkdf2_sha256.verify(password, values["password"]):
                     return True
     except FileNotFoundError:
         random_password = create_default_op_users()
