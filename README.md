@@ -284,7 +284,7 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 
 ## TODO & Ideas to be evaluated
 
-1. "Guest" and "Admin"-role are the two only roles taken into account so far
+1. ~~"Guest" and "Admin"-role are the two only roles taken into account so far~~ **DONE >= v0.0.6** `BREAKING-CHANGE`
 2. There is no logic yet that handles "running on OmniSwitch with AOS R8"
 3. No Adaptive Card is sent yet after creating the Employee account
 4. Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
