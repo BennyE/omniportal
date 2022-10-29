@@ -16,6 +16,7 @@ import string
 import os
 import sys
 from passlib.hash import pbkdf2_sha256
+import secrets
 
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ app = Flask(__name__)
 op_secret_key = "conf/omniportal_secret_key.json"
 op_userfile = "conf/omniportal_users.json"
 op_settingsfile = "conf/omniportal_settings.json"
+op_employeefile = "conf/omniportal_employees.json"
 
 # Try to load a secret token, if it doesn't exist create it.
 # This secures cookies and makes them unique to this installation.
@@ -244,6 +246,23 @@ def generate_admin_password():
         print("Found an undesireable word in password string, generating new one!")
         random_password = "".join(r.choice(letters) for _ in range(16))
     return random_password
+
+def generate_employee_username(length=6):
+    letters = "23456789abcdefghijkmnopqrstuvwxyz"
+    try:
+        r = random.SystemRandom()
+    except NotImplementedError as nie:
+        print(nie)
+        flash(_("Your system doesn't provide a secure random generator!"))
+        return False
+
+    # Generate a reasonable secure random password for Admin Accounts
+    random_employee_username = "".join(r.choice(letters) for _ in range(length))
+    
+    while check_for_undesireable_words(random_employee_username):
+        print("Found an undesireable word in password string, generating new one!")
+        random_employee_username = "".join(r.choice(letters) for _ in range(length))
+    return random_employee_username    
 
 def create_default_op_users():
     with open(op_userfile, "w") as op_users:
@@ -569,47 +588,85 @@ def get_employee_accounts():
 
     return resp_accounts.json()
 
-def create_employee_account(username, email, telephone):
-    settings = read_settings()
-    req = requests.Session()
-    login_header = {
-        "Content-Type":"application/json",
-        "Authorization": f"Bearer {settings['ove_ovc_api_key']}"
-    }
+def create_employee_file():
+    with open(op_employeefile, "w") as op_employees:
+        default_user = {}
+        op_employees.write(json.dumps(default_user))
+        os.chmod(op_employeefile, 0o600)
 
-    # You may need to adapt this to your local language
-    undesireable_words = ["cunt", "pussy", "nigger", "penis", "fotze", "hitler", "fuck"]
-
-    # Doesn't contain "l", "I", "O", "0" and "1" on purpose to avoid mistyping, thx Michael
-    letters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghijkmnopqrstuvwxyz"
+def read_employees_file():
     try:
-        r = random.SystemRandom()
-    except NotImplementedError as nie:
-        print(nie)
-        flash(_("Your system doesn't provide a secure random generator!"))
+        with open(op_employeefile, "r") as op_employees:
+            users = json.loads(op_employees.read())
+    except FileNotFoundError:
+        create_employee_file()
+        return False
+    return users
+
+def update_employee_in_file(employee_mail):
+    with open(op_employeefile, "w") as op_employees:
+        change_token = secrets.token_urlsafe()
+        employee_mail[employee_mail] = {"change_token":change_token, "pw_timestamp":datetime.datetime.fromtimestamp(time.time()).strftime("%d.%m.%Y, %H:%M:%S")}
+        op_employees.write(json.dumps(employee_mail))
+    return change_token
+
+def write_employee_to_file(new_employee_mail, new_employee_id, new_employee_ov_id):
+    with open(op_employeefile, "r") as op_employees:
+        users = json.loads(op_employees.read())
+        if new_employee_mail in users.keys():
+            return False
+    with open(op_employeefile, "w") as op_employees:
+        change_token = secrets.token_urlsafe()
+        users[new_employee_mail] = {"change_token":change_token, "user_id":new_employee_id, "pw_timestamp":_("Never"), "ovid":new_employee_ov_id}
+        op_employees.write(json.dumps(users))
+        return change_token
+
+def create_employee_account(email):
+    # send email with link to change password
+    # TODO: Test without configuration!
+    # check if account already exists
+
+    settings = read_settings()
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
         return False
 
-    # Generate a secure random password for Guest Accounts
-    random_password = "".join(r.choice(letters) for _ in range(16))
+    existing_users = read_employees_file()
 
-    for uw in undesireable_words:
-        if uw in random_password.lower():
-            print("[!] Detected undesirable word in password, generating a new one!")
-            # I assume our chances are very low to generate two undesireable words in a row
-            random_password = "".join(r.choice(letters) for _ in range(16))
-            break
+    if existing_users:
+        if email in existing_users.keys():
+            flash(_('An employee account for this email-address already exists!'))
+            return False
+
+    req = requests.Session()
+
+    login_header = {
+        "Content-Type":"application/json"
+    }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    random_employee_username = settings['employee_prefix'] + generate_employee_username()
+    unknown_password = generate_admin_password()
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV - Add Employee - LOGIN")
     
     employee_data = {
-        "repeat":random_password,
+        "repeat":unknown_password,
         "otherAttributesVOs":[],
-        "username":username,
-        "password":random_password,
-        "telephone":telephone,
-        "email":email
+        "username":random_employee_username,
+        "password":unknown_password,
+        "telephone":"",
+        "email":"",
+        "description":"User managed by OmniPortal"
     }
     print(employee_data)
     resp_create_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/addUser", headers=login_header, json=employee_data, verify=settings['check_certs'])
-    print("Employee Account: ", resp_create_employee.status_code, resp_create_employee.reason)
+    print(resp_create_employee.status_code, resp_create_employee.reason, "OV - Add Employee - Create User")
     if resp_create_employee.json()['errorCode'] != 0:
         if resp_create_employee.json()['errorMessage'] == "upam.usernameRepeat":
             flash(_('An employee account with this username already exists!'))
@@ -619,8 +676,29 @@ def create_employee_account(username, email, telephone):
             return False
         else:
             flash(_("An error occured! Creating employee account failed!"))
+            return False
     print(resp_create_employee.json())
     flash(_('The employee account was created!'), 'success')
+
+    employee_query_data = {
+        "start":"",
+        "querySize":1000
+    }
+    resp_accounts = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/getPageAllAccountList", headers=login_header, json=employee_query_data, verify=settings['check_certs'])
+    #print("Accounts: ", resp_accounts.status_code, resp_accounts.reason)
+    print(resp_accounts.status_code, resp_accounts.reason, "OV - Employee Accounts - Get all users")
+    #print(resp_accounts.json())
+
+    for employee in resp_accounts.json()["data"]:
+        if employee["username"] == random_employee_username:
+            employee_ov_id = employee["id"]
+            break
+
+    write_employee_to_file(email, random_employee_username, employee_ov_id)
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV - Add Employee - Logout")
+    req.close()
 
 def quick_guest_account(days):
     settings = read_settings()
@@ -1133,13 +1211,15 @@ def employee_accounts():
 def add_employee():
     form=AddEmployeeForm()
     if request.method == "POST":
-        print(request.form)
-        if request.form.get('username') and request.form.get('email') and request.form.get('telephone'):
-            print(request.form.get('username'))
-            print(request.form.get('email'))
-            print(request.form.get('telephone'))
+        #print(request.form)
+        #if request.form.get('username') and request.form.get('email') and request.form.get('telephone'):
+        if request.form.get('email'):
+            #print(request.form.get('username'))
+            #print(request.form.get('email'))
+            #print(request.form.get('telephone'))
             if not form.validate_on_submit():
                 return render_template("add_employee.html", form=form)
-            create_employee_account(request.form.get('username'), request.form.get('email'), request.form.get('telephone'))
+            #create_employee_account(request.form.get('username'), request.form.get('email'), request.form.get('telephone'))
+            create_employee_account(request.form.get('email'))
             return redirect(url_for('add_employee'))
     return render_template("add_employee.html", form=form)
