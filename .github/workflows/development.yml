@@ -8,8 +8,8 @@ on:
     # I only want to build when there is a new tag or for development
     branches:
       - 'dev'
-    #tags:
-    #  - 'v*.*.*'
+    tags:
+      - 'pre*.*.*'
   #pull_request:
   #  branches:
   #    - 'kubernetes'
