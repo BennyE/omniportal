@@ -6,8 +6,8 @@ on:
   #workflow_dispatch: []
   push:
     # I only want to build when there is a new tag or for development
-    branches:
-      - 'dev'
+    # branches:
+    #   - 'dev'
     tags:
       - '*.*.*-dev.*'
   #pull_request:
