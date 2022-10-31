@@ -9,7 +9,7 @@ on:
     branches:
       - 'dev'
     tags:
-      - 'pre*.*.*'
+      - '*.*.*-dev.*'
   #pull_request:
   #  branches:
   #    - 'kubernetes'
