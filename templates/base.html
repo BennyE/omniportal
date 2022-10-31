@@ -43,20 +43,31 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto">
                   {{ render_nav_item('index', render_icon('house') + _('Home') ) }}
-                  {% if g.user %}
-                  {{ render_nav_item('add_guest', render_icon('person-plus') + _('Add Guest')) }}
-                  {{ render_nav_item('guest_accounts', render_icon('people') + _('Guest Accounts')) }}
-                  {{ render_nav_item('add_employee', render_icon('person-plus-fill') + _('Add Employee')) }}
-                  {{ render_nav_item('employee_accounts', render_icon('people-fill') + _('Employee Accounts')) }}                  
-                  {% if g.entitlement == "admin" %}
-                  {{ render_nav_item('create_user', render_icon('person-badge') + _('Add User')) }}
-                  {{ render_nav_item('remove_user', render_icon('person-x') + _('Remove User')) }}
-                  {{ render_nav_item('admin', render_icon('tools') + _('Settings')) }}
+                  {% if g.user is not none and g.entitlement is not none %}
+                        {% if "guest" in g.entitlement or "admin" in g.entitlement %}
+                            {{ render_nav_item('add_guest', render_icon('person-plus') + _('Add Guest')) }}
+                            {{ render_nav_item('guest_accounts', render_icon('people') + _('Guest Accounts')) }}
+                        {% endif %}
                   {% endif %}
-                  {{ render_nav_item('change_password', render_icon('asterisk') + _('Change Password')) }}
-                  {{ render_nav_item('logout', render_icon('box-arrow-in-right') + _('Log Out')) }}
+                  {% if g.user is not none and g.entitlement is not none %}
+                        {% if "employee" in g.entitlement or "admin" in g.entitlement %}
+                            {{ render_nav_item('add_employee', render_icon('person-plus-fill') + _('Add Employee')) }}
+                            {{ render_nav_item('employee_accounts', render_icon('people-fill') + _('Employee Accounts')) }}
+                        {% endif %}
+                  {% endif %}
+                  {{ render_nav_item('employee_pw', render_icon('fingerprint') + _('Employee Passwords')) }}
+                  {% if g.user is not none and g.entitlement is not none %}
+                        {% if "admin" in g.entitlement %}
+                            {{ render_nav_item('create_user', render_icon('person-badge') + _('Add User')) }}
+                            {{ render_nav_item('remove_user', render_icon('person-x') + _('Remove User')) }}
+                            {{ render_nav_item('admin', render_icon('tools') + _('Settings')) }}
+                        {% endif %}
+                  {% endif %}
+                  {% if g.user is not none %}
+                    {{ render_nav_item('change_password', render_icon('asterisk') + _('Change Password')) }}
+                    {{ render_nav_item('logout', render_icon('box-arrow-in-right') + _('Log Out')) }}
                   {% else %}
-                  {{ render_nav_item('login', render_icon('key') + _('Log In')) }}
+                    {{ render_nav_item('login', render_icon('key') + _('Log In')) }}
                   {% endif %}
               </ul>
           </div>

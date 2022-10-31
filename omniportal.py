@@ -15,6 +15,8 @@ import random
 import string
 import os
 import sys
+from passlib.hash import pbkdf2_sha256
+import secrets
 
 app = Flask(__name__)
 
@@ -22,6 +24,7 @@ app = Flask(__name__)
 op_secret_key = "conf/omniportal_secret_key.json"
 op_userfile = "conf/omniportal_users.json"
 op_settingsfile = "conf/omniportal_settings.json"
+op_employeefile = "conf/omniportal_employees.json"
 
 # Try to load a secret token, if it doesn't exist create it.
 # This secures cookies and makes them unique to this installation.
@@ -61,7 +64,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     username = StringField(_l('Username'), validators=[DataRequired(message=_l('The username doesn\'t meet the requirements')), Length(1, 64)])
     password = PasswordField(_l('Password'), validators=[DataRequired(message=_l('The password doesn\'t meet the requirements')), Length(8, 150)])
-    entitlement = RadioField(label=_l('Entitlement'), choices=[('admin', _l('Administrator')), ('guest', _l('Guests')), ('read-only', _l('Read-Only'))], default='guest', validators=[DataRequired(message=_l('A selection is required!'))])
+    entitlement = SelectMultipleField(label=_l('Entitlement'), choices=[('admin', _l('Administrator')), ('guest', _l('Guests')), ('employee', _l('Employees'))], default='guest', validators=[DataRequired(message=_l('A selection is required!'))])
     submit = SubmitField(_l('Create User'))
 
 class ChangePasswordForm(FlaskForm):
@@ -83,13 +86,18 @@ class ChangeSettings(FlaskForm):
     guest_operator_username = StringField(_l('Guest Operator Username'), validators=[DataRequired(message=_l('The username doesn\'t meet the requirements')), Length(1, 32)])
     guest_operator_password = StringField(_l('Guest Operator Password'), validators=[DataRequired(message=_l('The password doesn\'t meet the requirements')), Length(6, 16)], widget=PasswordInput(hide_value=False))
     guest_prefix = StringField(_l('Guest Prefix'), validators=[DataRequired(message=_l('The guest prefix doesn\'t meet the requirements')), Length(1, 10)], default=_l('guest'))
-    wifi_network = StringField(_l('Wi-Fi / SSID Name'), validators=[DataRequired(message=_l('The Wi-Fi network / SSID name doesn\'t meet the requirements')), Length(1, 31)])
+    wifi_network = StringField(_l('Guest Wi-Fi / SSID Name'), validators=[DataRequired(message=_l('The Wi-Fi network / SSID name doesn\'t meet the requirements')), Length(1, 31)])
     ale_rainbow_webhook = StringField(_l('ALE Rainbow Webhook'), widget=PasswordInput(hide_value=False))
     ringcentral_webhook = StringField(_l('RingCentral / Rainbow Office Webhook'), widget=PasswordInput(hide_value=False))
     ms_teams_webhook = StringField(_l('Microsoft Teams Webhook'), widget=PasswordInput(hide_value=False))
-    ove_ovc_url = URLField(_l('OmniVista 2500 NMS / OmniVista Cirrus URL'))
+    employee_prefix = StringField(_l('Employee Prefix'), default=_l('employee_'))
+    employee_wifi = StringField(_l('Employee Wi-Fi / SSID Name'))
+    ove_ovc_url = URLField(_l('OmniVista 2500 NMS / OmniVista Cirrus URL'), default='https://tenant-name.ov.ovcirrus.com')
     validate_ove_ovc_cert = RadioField(_l('Validate OmniVista 2500 NMS HTTPS certificate'), choices=[('yes', 'Yes'), ('no', 'No')], default='no')
-    ove_ovc_api_key = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus API Key'), widget=PasswordInput(hide_value=False))
+    # Access via API key is currently not offered
+    #ove_ovc_api_key = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus API Key'), widget=PasswordInput(hide_value=False))
+    ove_ovc_username = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Username'))
+    ove_ovc_password = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Password'), widget=PasswordInput(hide_value=False))
     submit = SubmitField(_l('Save Settings'))
     @classmethod
     def new(cls):
@@ -103,10 +111,14 @@ class ChangeSettings(FlaskForm):
             form.ale_rainbow_webhook.data = settings["ale_rainbow_webhook"]
             form.ringcentral_webhook.data = settings["ringcentral_webhook"]
             form.ms_teams_webhook.data = settings["ms_teams_webhook"]
+            form.employee_prefix.data = settings["employee_prefix"]
             form.wifi_network.data = settings["wifi_network"]
+            form.employee_wifi.data = settings["employee_wifi"]
             form.ove_ovc_url.data = settings["ove_ovc_url"]
             form.validate_ove_ovc_cert.data = settings["validate_ove_ovc_cert"]
-            form.ove_ovc_api_key.data = settings["ove_ovc_api_key"]
+            #form.ove_ovc_api_key.data = settings["ove_ovc_api_key"]
+            form.ove_ovc_username.data = settings["ove_ovc_username"]
+            form.ove_ovc_password.data = settings["ove_ovc_password"]
         except KeyError:
             pass
         return form
@@ -120,9 +132,9 @@ class AddGuestForm(FlaskForm):
     submit = SubmitField(label=_l('Create Guest'))
 
 class AddEmployeeForm(FlaskForm):
-    username = StringField(_l('Username'), validators=[Regexp(r'^[0-9a-zA-Z/\.\-:_@\S]+$', message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(1, 32)])
+    #username = StringField(_l('Username'), validators=[Regexp(r'^[0-9a-zA-Z/\.\-:_@\S]+$', message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(1, 32)])
     email = StringField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
-    telephone = StringField(_l('Mobile'), validators=[DataRequired(message=_l('The field can only contain 0-9 +')), Length(4, 18)])
+    #telephone = StringField(_l('Mobile'), validators=[DataRequired(message=_l('The field can only contain 0-9 +')), Length(4, 18)])
     submit = SubmitField(label=_l('Create Employee'))
 
 class TestGuestForm(FlaskForm):
@@ -136,6 +148,16 @@ class QuickGuestForm(FlaskForm):
     seven_days = SubmitField(_l('7 Days'))
     fourteen_days = SubmitField(_l('14 Days'))
     thirty_days = SubmitField(_l('30 Days'))
+
+class ChangeEmployeePasswordWithToken(FlaskForm):
+    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    password = PasswordField(_l('New Password'), validators=[Regexp(r'^[ -~]+$', message=_l('The field can only contain ASCII characters 0x20-0x7E. Length 6-16 characters')), Length(6, 16)])
+    change_token = HiddenField()
+    submit = SubmitField(label=_l('Change Password'))
+
+class RequestEmployeePasswordChange(FlaskForm):
+    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    submit = SubmitField(label=_l('Request Password Change Link'))
 
 @babel.localeselector
 def get_locale():
@@ -152,7 +174,35 @@ def get_locale():
 def admin_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        if g.user is None or (g.entitlement is None or g.entitlement != "admin"):
+        if g.user is None or (g.entitlement is None or "admin" not in g.entitlement):
+            return redirect(url_for('login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+def guest_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('login'))
+        elif g.entitlement is None:
+            return redirect(url_for('login'))
+        elif ("guest" not in g.entitlement) and ("admin" not in g.entitlement):
+            return redirect(url_for('login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+def employee_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('login'))
+        elif g.entitlement is None:
+            return redirect(url_for('login'))
+        elif ("employee" not in g.entitlement) and ("admin" not in g.entitlement):
             return redirect(url_for('login'))
 
         return view(**kwargs)
@@ -180,20 +230,69 @@ def get_usernames():
     except json.decoder.JSONDecodeError:
         pass
 
+def check_for_undesireable_words(input):
+    # You may need to adapt this to your local language
+    undesireable_words = ["cunt", "pussy", "nigger", "penis", "fotze", "hitler", "fuck"]
+
+    for uw in undesireable_words:
+        if uw in input.lower():
+            return True
+    return False
+
+def generate_admin_password():
+    # Doesn't contain "l", "I", "O", "0" and "1" on purpose to avoid mistyping, thx Michael
+    letters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghijkmnopqrstuvwxyz"
+    try:
+        r = random.SystemRandom()
+    except NotImplementedError as nie:
+        print(nie)
+        flash(_("Your system doesn't provide a secure random generator!"))
+        return False
+
+    # Generate a reasonable secure random password for Admin Accounts
+    random_password = "".join(r.choice(letters) for _ in range(16))
+    
+    while check_for_undesireable_words(random_password):
+        print("Found an undesireable word in password string, generating new one!")
+        random_password = "".join(r.choice(letters) for _ in range(16))
+    return random_password
+
+def generate_employee_username(length=6):
+    letters = "23456789abcdefghijkmnopqrstuvwxyz"
+    try:
+        r = random.SystemRandom()
+    except NotImplementedError as nie:
+        print(nie)
+        flash(_("Your system doesn't provide a secure random generator!"))
+        return False
+
+    # Generate a reasonable secure random password for Admin Accounts
+    random_employee_username = "".join(r.choice(letters) for _ in range(length))
+    
+    while check_for_undesireable_words(random_employee_username):
+        print("Found an undesireable word in password string, generating new one!")
+        random_employee_username = "".join(r.choice(letters) for _ in range(length))
+    return random_employee_username    
+
 def create_default_op_users():
     with open(op_userfile, "w") as op_users:
         default_user = {}
-        default_user["admin"] = {"password":"admin123", "entitlement":"admin"}
+        random_password = generate_admin_password()
+        default_user["admin"] = {"password":pbkdf2_sha256.hash(random_password), "entitlement":["admin"]}
         op_users.write(json.dumps(default_user))
         os.chmod(op_userfile, 0o600)
+    return random_password
 
-def create_op_user(new_user, password, entitlement):
+def create_op_user(new_user, password, entitlements):
     with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
         if new_user in users.keys():
             return False
     with open(op_userfile, "w") as op_users:
-        users[new_user] = {"password":password, "entitlement":entitlement}
+        final_entitlements = []
+        for entitlement in entitlements:
+            final_entitlements.append(entitlement)
+        users[new_user] = {"password":pbkdf2_sha256.hash(password), "entitlement":final_entitlements}
         op_users.write(json.dumps(users))
         return True
 
@@ -212,10 +311,10 @@ def remove_op_user(username):
 def change_op_password(username, password, new_password):
     with open(op_userfile, "r") as op_users:
         users = json.loads(op_users.read())
-        if users[username]["password"] != password:
+        if not pbkdf2_sha256.verify(password, users[username]["password"]):
             return False
     with open(op_userfile, "w") as op_users:
-        users[username]["password"] = new_password
+        users[username]["password"] = pbkdf2_sha256.hash(new_password)
         op_users.write(json.dumps(users))
         return True
 
@@ -231,9 +330,12 @@ def create_default_op_settings():
                 "ale_rainbow_webhook": "", 
                 "ringcentral_webhook": "", 
                 "ms_teams_webhook": "", 
+                "employee_prefix": "",
+                "employee_wifi": "",
                 "ove_ovc_url": "", 
                 "validate_ove_ovc_cert": "no", 
-                "ove_ovc_api_key": ""
+                "ove_ovc_username": "",
+                "ove_ovc_password": ""
             }
             settings_fh.write(json.dumps(default_settings))
             os.chmod(op_settingsfile, 0o600)
@@ -257,7 +359,7 @@ def read_settings():
 
 def save_settings(guest_operator_url, guest_operator_username, guest_operator_password, guest_prefix, wifi_network,
                     ale_rainbow_webhook, ringcentral_webhook, ms_teams_webhook, ove_ovc_url, validate_ove_ovc_cert,
-                    ove_ovc_api_key):
+                    employee_wifi, employee_prefix, ove_ovc_username, ove_ovc_password):
     with open(op_settingsfile, "w") as settings:
         setting = {}
         setting["guest_operator_url"] = guest_operator_url.rstrip("/")
@@ -270,7 +372,11 @@ def save_settings(guest_operator_url, guest_operator_username, guest_operator_pa
         setting["ms_teams_webhook"] = ms_teams_webhook
         setting["ove_ovc_url"] = ove_ovc_url.rstrip("/")
         setting["validate_ove_ovc_cert"] = validate_ove_ovc_cert
-        setting["ove_ovc_api_key"] = ove_ovc_api_key
+        #setting["ove_ovc_api_key"] = ove_ovc_api_key
+        setting["employee_wifi"] = employee_wifi
+        setting["employee_prefix"] = employee_prefix
+        setting["ove_ovc_username"] = ove_ovc_username
+        setting["ove_ovc_password"] = ove_ovc_password
         settings.write(json.dumps(setting))
     return True
 
@@ -279,11 +385,11 @@ def valid_login(username, password):
         with open(op_userfile, "r") as op_users:
             users = json.loads(op_users.read())
             for user, values in users.items():
-                if user == username and password == values["password"]:
+                if user == username and pbkdf2_sha256.verify(password, values["password"]):
                     return True
     except FileNotFoundError:
-        create_default_op_users()
-        flash(_('Default credentials created: admin/admin123 to login!'), 'success')
+        random_password = create_default_op_users()
+        flash(_('Default credentials created: admin/%(pw) to login!', pw=random_password), 'success')
         return False
 
 def log_the_user_in(username):
@@ -318,7 +424,7 @@ def admin():
     #     return render_template("create_user.html")
     #error = None
     form = ChangeSettings.new()
-    if request.method == "POST" and g.entitlement == "admin":
+    if request.method == "POST" and "admin" in g.entitlement:
         if save_settings(request.form["guest_operator_url"],
                          request.form["guest_operator_username"],
                          request.form["guest_operator_password"],
@@ -329,7 +435,11 @@ def admin():
                          request.form["ms_teams_webhook"],
                          request.form["ove_ovc_url"],
                          request.form["validate_ove_ovc_cert"],
-                         request.form["ove_ovc_api_key"]
+                         #request.form["ove_ovc_api_key"]
+                         request.form["employee_wifi"],
+                         request.form["employee_prefix"],
+                         request.form["ove_ovc_username"],
+                         request.form["ove_ovc_password"]
                          ):
             flash(_('The settings were saved!'), 'success')
             return redirect(url_for('index'))
@@ -348,10 +458,10 @@ def create_user():
     #     return render_template("create_user.html")
     #error = None
     form = CreateUserForm()
-    if request.method == "POST" and g.entitlement == "admin":
+    if request.method == "POST" and "admin" in g.entitlement:
         if create_op_user(request.form["username"],
                           request.form["password"],
-                          request.form["entitlement"]):
+                          request.form.getlist("entitlement")):
             flash(_('The user was successfully created!'), 'success')
             return redirect(url_for('index'))
         else:
@@ -371,7 +481,7 @@ def change_password():
     form = ChangePasswordForm()
     if request.method == "POST":
         if change_op_password(g.user,
-                            request.form["current_password"],
+                              request.form["current_password"],
                               request.form["new_password"]):
             flash(_('The password was updated!'), 'success')
             return redirect(url_for('index'))
@@ -456,64 +566,134 @@ def get_guest_accounts():
     req.get(f"{settings['guest_operator_url']}/sponsor/api/ham/guest/manager/logout")
     return resp_accounts.json()
 
+def get_local_employee_accounts():
+    data = read_employees_file()
+    if data:
+        return data
+    else:
+        return False
+
 def get_employee_accounts():
     settings = read_settings()
     req = requests.Session()
+
     login_header = {
-        "Content-Type":"application/json",
-        "Authorization": f"Bearer {settings['ove_ovc_api_key']}"
+        "Content-Type":"application/json"
     }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV Login - Employee Accounts")
+    #print(ov_login.json())
 
     employee_data = {
         "start":"",
         "querySize":1000
     }
     resp_accounts = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/getPageAllAccountList", headers=login_header, json=employee_data, verify=settings['check_certs'])
-    print("Accounts: ", resp_accounts.status_code, resp_accounts.reason)
+    #print("Accounts: ", resp_accounts.status_code, resp_accounts.reason)
+    print(resp_accounts.status_code, resp_accounts.reason, "OV Query - Employee Accounts - DATA")
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV Logout - Employee Accounts")
+
+    req.close()
 
     return resp_accounts.json()
 
-def create_employee_account(username, email, telephone):
-    settings = read_settings()
-    req = requests.Session()
-    login_header = {
-        "Content-Type":"application/json",
-        "Authorization": f"Bearer {settings['ove_ovc_api_key']}"
-    }
+def create_employee_file():
+    with open(op_employeefile, "w") as op_employees:
+        default_user = {}
+        op_employees.write(json.dumps(default_user))
+        os.chmod(op_employeefile, 0o600)
 
-    # You may need to adapt this to your local language
-    undesireable_words = ["cunt", "pussy", "nigger", "penis", "fotze", "hitler", "fuck"]
-
-    # Doesn't contain "l", "I", "O", "0" and "1" on purpose to avoid mistyping, thx Michael
-    letters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghijkmnopqrstuvwxyz"
+def read_employees_file():
     try:
-        r = random.SystemRandom()
-    except NotImplementedError as nie:
-        print(nie)
-        flash(_("Your system doesn't provide a secure random generator!"))
+        with open(op_employeefile, "r") as op_employees:
+            users = json.loads(op_employees.read())
+    except FileNotFoundError:
+        create_employee_file()
+        return False
+    except json.decoder.JSONDecodeError:
+        flash(_("Can't read omniportal_employees.json file, you'll need your backup!"), "danger")
+        return False
+    return users
+
+def update_employee_in_file(employee_mail, update_timestamp="yes"):
+    with open(op_employeefile, "r") as op_employees:
+        users = json.loads(op_employees.read())
+        if employee_mail not in users.keys():
+            return False    
+    with open(op_employeefile, "w") as op_employees:
+        change_token = secrets.token_urlsafe()
+        users[employee_mail]["change_token"] = change_token
+        if update_timestamp == "yes":
+            users[employee_mail]["pw_timestamp"] = datetime.datetime.fromtimestamp(time.time()).strftime("%d.%m.%Y, %H:%M:%S")
+        op_employees.write(json.dumps(users))
+    return change_token
+
+def write_employee_to_file(new_employee_mail, new_employee_id, new_employee_ov_id):
+    with open(op_employeefile, "r") as op_employees:
+        users = json.loads(op_employees.read())
+        if new_employee_mail in users.keys():
+            return False
+    with open(op_employeefile, "w") as op_employees:
+        change_token = secrets.token_urlsafe()
+        users[new_employee_mail] = {"change_token":change_token, "user_id":new_employee_id, "pw_timestamp":_("Never"), "ovid":new_employee_ov_id}
+        op_employees.write(json.dumps(users))
+        return change_token
+
+def create_employee_account(email):
+    # TODO: send email with link to change password
+    # TODO: Test without configuration!
+
+    settings = read_settings()
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
         return False
 
-    # Generate a secure random password for Guest Accounts
-    random_password = "".join(r.choice(letters) for _ in range(16))
+    email = email.lower()
 
-    for uw in undesireable_words:
-        if uw in random_password.lower():
-            print("[!] Detected undesirable word in password, generating a new one!")
-            # I assume our chances are very low to generate two undesireable words in a row
-            random_password = "".join(r.choice(letters) for _ in range(16))
-            break
+    existing_users = read_employees_file()
+
+    if existing_users:
+        if email in existing_users.keys():
+            flash(_('An employee account for this email-address already exists!'))
+            return False
+
+    req = requests.Session()
+
+    login_header = {
+        "Content-Type":"application/json"
+    }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    random_employee_username = settings['employee_prefix'] + generate_employee_username()
+    unknown_password = generate_admin_password()
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV - Add Employee - LOGIN")
     
     employee_data = {
-        "repeat":random_password,
+        "repeat":unknown_password,
         "otherAttributesVOs":[],
-        "username":username,
-        "password":random_password,
-        "telephone":telephone,
-        "email":email
+        "username":random_employee_username,
+        "password":unknown_password,
+        "telephone":"",
+        "email":"",
+        "description":"User managed by OmniPortal"
     }
     print(employee_data)
     resp_create_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/addUser", headers=login_header, json=employee_data, verify=settings['check_certs'])
-    print("Employee Account: ", resp_create_employee.status_code, resp_create_employee.reason)
+    print(resp_create_employee.status_code, resp_create_employee.reason, "OV - Add Employee - Create User")
     if resp_create_employee.json()['errorCode'] != 0:
         if resp_create_employee.json()['errorMessage'] == "upam.usernameRepeat":
             flash(_('An employee account with this username already exists!'))
@@ -522,9 +702,160 @@ def create_employee_account(username, email, telephone):
             flash(_('Illegal parameters given!'))
             return False
         else:
-            flash(_(f"An error occured! {resp_create_employee.json()['errorMessage']}"))
+            flash(_("An error occured! Creating employee account failed!"))
+            return False
     print(resp_create_employee.json())
     flash(_('The employee account was created!'), 'success')
+
+    employee_query_data = {
+        "start":"",
+        "querySize":1000
+    }
+    resp_accounts = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/getPageAllAccountList", headers=login_header, json=employee_query_data, verify=settings['check_certs'])
+    #print("Accounts: ", resp_accounts.status_code, resp_accounts.reason)
+    print(resp_accounts.status_code, resp_accounts.reason, "OV - Employee Accounts - Get all users")
+    #print(resp_accounts.json())
+
+    for employee in resp_accounts.json()["data"]:
+        if employee["username"] == random_employee_username:
+            employee_ov_id = employee["id"]
+            break
+
+    change_token = write_employee_to_file(email, random_employee_username, employee_ov_id)
+    # TODO: Send mail and remove the print
+    print(url_for('employee_pw', user_email=email))
+    print(url_for('employee_pw', _external=True, user_email=email, change_token=change_token))
+
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV - Add Employee - Logout")
+    req.close()
+
+def update_employee_account(username, ov_user_id, password):
+    settings = read_settings()
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
+        return False
+
+    req = requests.Session()
+
+    login_header = {
+        "Content-Type":"application/json"
+    }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV - Update Employee - LOGIN")
+    
+    employee_data = {
+        "id": ov_user_id,
+        "repeat":password,
+        "username":username,
+        "password":password
+    }
+    print(employee_data)
+    resp_update_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/editAccount", headers=login_header, json=employee_data, verify=settings['check_certs'])
+    print(resp_update_employee.status_code, resp_update_employee.reason, "OV - Update Employee - Change Employee")
+    if resp_update_employee.json()['errorCode'] != 0:
+        if resp_update_employee.json()['errorMessage'] == "upam.usernameRepeat":
+            flash(_('An employee account with this username already exists!'))
+            return False
+        elif resp_update_employee.json()['errorMessage'] == "upam.parametersIllegal":
+            flash(_('Illegal parameters given!'))
+            return False
+        else:
+            flash(_("An error occured! Updating employee account failed!"))
+            return False
+    print(resp_update_employee.json())
+    flash(_('The employee account/password was updated!'), 'success')
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV - Update Employee - Logout")
+    req.close()
+    return True
+
+@app.route('/employee_pw/', methods=["POST", "GET"])
+@app.route('/employee_pw/<user_email>', methods=["POST", "GET"])
+def employee_pw(user_email=None):
+    if (request.method == "GET" and user_email and request.args.get('change_token')):
+
+        existing_users = read_employees_file()
+
+        if existing_users:
+            if user_email in existing_users.keys():
+                if existing_users[user_email]["change_token"] == request.args.get('change_token'):
+                    form = ChangeEmployeePasswordWithToken(email=user_email, change_token=request.args.get('change_token'))
+                    return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+                else:
+                    flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                    return redirect(url_for('index'))
+            else:
+                flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                return redirect(url_for('index'))
+        else:
+            flash(_("There are no employees registered yet!"))
+            return redirect(url_for('index'))
+    elif (request.method == "GET" and not user_email):
+        form = RequestEmployeePasswordChange()
+        return render_template("change_employee_password.html", title=_("Request password change for employee"), form=form)
+    elif (request.method == "POST" and user_email and request.args.get('change_token')):
+        form=ChangeEmployeePasswordWithToken()
+        if not form.validate_on_submit():
+            return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+
+        existing_users = read_employees_file()
+
+        if existing_users:
+            if request.form.get('email') in existing_users.keys():
+                if existing_users[request.form.get('email')]["change_token"] == request.form.get('change_token'):
+                    ov_username = existing_users[request.form.get('email')]['user_id']
+                    ov_user_id = existing_users[request.form.get('email')]['ovid']
+                    new_password = request.form.get('password')
+
+                    result = update_employee_account(ov_username, ov_user_id, new_password)
+                    if result:
+                        update_employee_in_file(request.form.get('email'))
+                        return redirect(url_for('index'))
+                    else:
+                        return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+                else:
+                    # TODO: ALERT 
+                    flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                    return redirect(url_for('index'))
+            else:
+                # TODO: ALERT
+                flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                return redirect(url_for('index'))
+        else:
+            flash(_("There are no employees registered yet!"))
+            return redirect(url_for('index'))
+    elif (request.method == "POST" and not user_email):
+        form = RequestEmployeePasswordChange()
+        if not form.validate_on_submit():
+            return render_template("change_employee_password.html", title=_("Request password change for employee"), form=form)        
+        # TODO: Send email to user
+        #users = read_employees_file()
+        # Note that the function checks if the user exists and otherwise returns False
+        result = update_employee_in_file(request.form.get("email"), update_timestamp="no")
+        if result:
+            # TODO: Send mail
+            # flash message
+            print(url_for('employee_pw', user_email=request.form.get("email")))
+            print(url_for('employee_pw', _external=True, user_email=request.form.get("email"), change_token=result))
+            flash(_('An email containing a link to change your password has been sent!'), 'success')
+            return redirect(url_for('index'))
+        else:
+            # error message that will investigate
+            # TODO: Alert
+            flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+            return redirect(url_for('index'))
+    else:
+        flash(_("Invalid route!"))
+        return redirect(url_for('index'))        
 
 def quick_guest_account(days):
     settings = read_settings()
@@ -939,7 +1270,8 @@ def timestamp_to_date(timestamp):
     return datetime.datetime.strftime(datetime.datetime.fromtimestamp(timestamp/1000), "%d.%m.%Y %H:%M")
 
 @app.route("/guest_accounts")
-@login_required
+#@login_required
+@guest_required
 def guest_accounts():
 
     guest_accounts = get_guest_accounts()
@@ -962,7 +1294,8 @@ def view_message(guest_id):
     return f'Could not view message {guest_id} as it does not exist. Return to <a href="/guest_accounts">table</a>.'
 
 @app.route("/add_guest", methods=["POST", "GET"])
-@login_required
+#@login_required
+@guest_required
 def add_guest():
     form=AddGuestForm()
     quick_guest=QuickGuestForm()
@@ -999,7 +1332,8 @@ def add_guest():
     return render_template("add_guest.html", form=form, quick_guest=quick_guest)
 
 @app.route("/test_guest", methods=["POST", "GET"])
-@login_required
+#@login_required
+@guest_required
 def test_guest():
     form=TestGuestForm()
     if not form.validate_on_submit():
@@ -1010,33 +1344,65 @@ def test_guest():
     return render_template("test_guest.html", form=form)
 
 @app.route("/employee_accounts")
-@login_required
-def employee_accounts():
-    employee_accounts = get_employee_accounts()
-    employee_data = employee_accounts['data']
-    print(employee_data)
-    titles = [
-        ('username', _('Username')),
-        ('email', _('Email')),
-        ('telephone', _('Telephone (Mobile)')),
-        ('status', _('Status')),
-        ('dateOfEffective', _('Valid From')),
-        ('actions', _('Actions'))
-    ]
-    return render_template("employee_accounts.html", data=employee_data, titles=titles)
+@app.route("/employee_accounts/<user_email>")
+#@login_required
+@employee_required
+def employee_accounts(user_email=None):
+    employee_data = get_local_employee_accounts()
+
+    if not employee_data:
+        return redirect(url_for('index'))
+    # Delete = /api/ham/userAccount/deleteAccount
+    # Post ID to delete
+    # result	"upam.deleteSuccess.employeeAccount"
+    # 
+    #employee_accounts = get_employee_accounts()
+    #employee_data = employee_accounts['data']
+
+    print(request.args)
+
+    if (request.method == "GET" and user_email and (request.args.get("action") == "send_change_password_mail")):
+        if user_email in employee_data.keys():
+            print(url_for('employee_pw', user_email=user_email))
+            print(url_for('employee_pw', _external=True, user_email=user_email, change_token=employee_data[user_email]['change_token']))
+            flash(_('An email containing a link to change the password has been sent!'), 'success')
+            return redirect(url_for('employee_accounts'))
+        else:
+            flash(_("There was no account found for a user/employee with this email address!"))
+            return redirect(url_for('employee_accounts'))
+    elif (request.method == "GET" and user_email and request.args.get("action=delete_employee")):
+        # TODO: Add delete function
+        pass
+    else:
+        #print(employee_data)
+        # >>> request.host
+        # 'omniportal2-127.0.0.1.sslip.io:5001'
+        titles = [
+            ('email', _('Email')),
+            ('username', _('Username')),
+            # ('telephone', _('Telephone (Mobile)')),
+            # ('status', _('Status')),
+            # ('dateOfEffective', _('Valid From')),
+            ('last_change', _("Last successful password change")),
+            ('actions', _('Actions'))
+        ]
+        return render_template("employee_local_accounts.html", data=employee_data, titles=titles)
 
 @app.route("/add_employee", methods=["POST", "GET"])
-@login_required
+#@login_required
+@employee_required
 def add_employee():
     form=AddEmployeeForm()
     if request.method == "POST":
-        print(request.form)
-        if request.form.get('username') and request.form.get('email') and request.form.get('telephone'):
-            print(request.form.get('username'))
-            print(request.form.get('email'))
-            print(request.form.get('telephone'))
+        #print(request.form)
+        #if request.form.get('username') and request.form.get('email') and request.form.get('telephone'):
+        if request.form.get('email'):
+            #print(request.form.get('username'))
+            #print(request.form.get('email'))
+            #print(request.form.get('telephone'))
             if not form.validate_on_submit():
                 return render_template("add_employee.html", form=form)
-            create_employee_account(request.form.get('username'), request.form.get('email'), request.form.get('telephone'))
+            #create_employee_account(request.form.get('username'), request.form.get('email'), request.form.get('telephone'))
+            create_employee_account(request.form.get('email'))
             return redirect(url_for('add_employee'))
     return render_template("add_employee.html", form=form)

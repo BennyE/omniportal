@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-05 21:09+0200\n"
+"POT-Creation-Date: 2022-10-31 22:18+0100\n"
 "PO-Revision-Date: 2022-08-27 16:18+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,247 +18,395 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.3\n"
 
-#: omniportal.py:34 omniportal.py:39 omniportal.py:50 omniportal.py:86
-#: omniportal.py:836
+#: omniportal.py:60 omniportal.py:65 omniportal.py:76 omniportal.py:128
+#: omniportal.py:141 omniportal.py:1281 omniportal.py:1382
 msgid "Username"
 msgstr "Benutzername"
 
-#: omniportal.py:34 omniportal.py:39 omniportal.py:60 omniportal.py:86
+#: omniportal.py:60 omniportal.py:65 omniportal.py:86
 msgid "The username doesn't meet the requirements"
 msgstr "Der Benutzername erfüllt nicht die Bedingungen"
 
-#: omniportal.py:35 omniportal.py:40
+#: omniportal.py:61 omniportal.py:66
 msgid "Password"
 msgstr "Passwort"
 
-#: omniportal.py:35 omniportal.py:40 omniportal.py:45 omniportal.py:46
-#: omniportal.py:61
+#: omniportal.py:61 omniportal.py:66 omniportal.py:71 omniportal.py:72
+#: omniportal.py:87
 msgid "The password doesn't meet the requirements"
 msgstr "Das Passwort erfüllt nicht die Bedingungen"
 
-#: omniportal.py:36 templates/base.html:57
+#: omniportal.py:62 templates/base.html:70
 msgid "Log In"
 msgstr "Anmelden"
 
-#: omniportal.py:41
+#: omniportal.py:67
 msgid "Entitlement"
 msgstr "Berechtigung"
 
-#: omniportal.py:41
+#: omniportal.py:67
 msgid "Administrator"
 msgstr "Administrator"
 
-#: omniportal.py:41
+#: omniportal.py:67
 msgid "Guests"
 msgstr "Gäste"
 
-#: omniportal.py:41
-msgid "Read-Only"
-msgstr "Nur-Lesen"
+#: omniportal.py:67
+msgid "Employees"
+msgstr "Mitarbeiter"
 
-#: omniportal.py:41
+#: omniportal.py:67
 msgid "A selection is required!"
 msgstr "Eine Auswahl ist nötig!"
 
-#: omniportal.py:42 templates/create_user.html:5 templates/create_user.html:11
+#: omniportal.py:68 templates/create_user.html:5 templates/create_user.html:11
 msgid "Create User"
 msgstr "Benutzer hinzufügen"
 
-#: omniportal.py:45
+#: omniportal.py:71
 msgid "Current Password"
 msgstr "Aktuelles Passwort"
 
-#: omniportal.py:46
+#: omniportal.py:72 omniportal.py:154
 msgid "New Password"
 msgstr "Neues Passwort"
 
-#: omniportal.py:47 templates/base.html:54 templates/change_password.html:5
-#: templates/change_password.html:11
+#: omniportal.py:73 omniportal.py:156 templates/base.html:67
+#: templates/change_password.html:5 templates/change_password.html:11
 msgid "Change Password"
 msgstr "Passwort ändern"
 
-#: omniportal.py:51 templates/base.html:51 templates/remove_user.html:5
+#: omniportal.py:77 templates/base.html:62 templates/remove_user.html:5
 #: templates/remove_user.html:11
 msgid "Remove User"
 msgstr "Benutzer entfernen"
 
-#: omniportal.py:60
+#: omniportal.py:85
+msgid "OmniVista 2500 NMS / OmniVista Cirrus UPAM URL"
+msgstr ""
+
+#: omniportal.py:86
 msgid "Guest Operator Username"
 msgstr "Guest Operator Benutzername"
 
-#: omniportal.py:61
+#: omniportal.py:87
 msgid "Guest Operator Password"
 msgstr "Guest Operator Passwort"
 
-#: omniportal.py:62
+#: omniportal.py:88
 msgid "Guest Prefix"
 msgstr "Gast Präfix"
 
-#: omniportal.py:62
+#: omniportal.py:88
 msgid "The guest prefix doesn't meet the requirements"
 msgstr "Das Präfix erfüllt nicht die Bedingungen"
 
-#: omniportal.py:62
+#: omniportal.py:88
 msgid "guest"
 msgstr "Gast"
 
-#: omniportal.py:63
-msgid "Wi-Fi / SSID Name"
-msgstr "Wi-Fi / SSID Name"
+#: omniportal.py:89
+msgid "Guest Wi-Fi / SSID Name"
+msgstr "Gast Wi-Fi / SSID Name"
 
-#: omniportal.py:63
+#: omniportal.py:89
 msgid "The Wi-Fi network / SSID name doesn't meet the requirements"
 msgstr "Der Wi-Fi Netzwerk / SSID Name erfüllt nicht die Bedingungen"
 
-#: omniportal.py:64
+#: omniportal.py:90
 msgid "ALE Rainbow Webhook"
 msgstr "ALE Rainbow Webhook"
 
-#: omniportal.py:65
+#: omniportal.py:91
 msgid "RingCentral / Rainbow Office Webhook"
 msgstr "RingCentral / Rainbow Office Webhook"
 
-#: omniportal.py:66
+#: omniportal.py:92
 msgid "Microsoft Teams Webhook"
 msgstr "Microsoft Teams Webhook"
 
-#: omniportal.py:67
+#: omniportal.py:93
+msgid "Employee Prefix"
+msgstr "Mitarbeiter Präfix"
+
+#: omniportal.py:93
+msgid "employee_"
+msgstr "Mitarbeiter_"
+
+#: omniportal.py:94
+msgid "Employee Wi-Fi / SSID Name"
+msgstr "Mitarbeiter Wi-Fi / SSID Name"
+
+#: omniportal.py:95
+msgid "OmniVista 2500 NMS / OmniVista Cirrus URL"
+msgstr ""
+
+#: omniportal.py:96
+msgid "Validate OmniVista 2500 NMS HTTPS certificate"
+msgstr "Validieren des OmniVista 2500 NMS HTTPS Zertifikats"
+
+#: omniportal.py:99
+msgid "OmniVista 2500 NMS / OmniVista Cirrus Username"
+msgstr "OmniVista 2500 NMS / OmniVista Cirrus Benutzername"
+
+#: omniportal.py:100
+msgid "OmniVista 2500 NMS / OmniVista Cirrus Password"
+msgstr "OmniVista 2500 NMS / OmniVista Cirrus Passwort"
+
+#: omniportal.py:101
 msgid "Save Settings"
 msgstr "Einstellungen speichern"
 
-#: omniportal.py:89 omniportal.py:838
+#: omniportal.py:128 omniportal.py:136 omniportal.py:141 omniportal.py:153
+#: omniportal.py:159
+msgid "The field can only contain 0-9 a-z A-Z / . - : _ @"
+msgstr "Das Feld kann nur folgendene Inhalte haben 0-9 a-z A-Z / . - : _ @"
+
+#: omniportal.py:131 omniportal.py:1283
 msgid "Valid Until"
 msgstr "Gültig bis"
 
-#: omniportal.py:89
+#: omniportal.py:131
 msgid "Select the day until when the account should be valid!"
 msgstr "Tag auswählen bis zu welchem der Zugang gültig ist!"
 
-#: omniportal.py:90 templates/add_guest.html:5 templates/add_guest.html:20
+#: omniportal.py:132 omniportal.py:142 templates/add_guest.html:5
+#: templates/add_guest.html:20
 msgid "Create Guest"
 msgstr "Gast hinzufügen"
 
-#: omniportal.py:93
+#: omniportal.py:136 omniportal.py:153 omniportal.py:159 omniportal.py:1381
+msgid "Email"
+msgstr ""
+
+#: omniportal.py:138
+msgid "Create Employee"
+msgstr "Mitarbeiter anlegen"
+
+#: omniportal.py:145
 msgid "1 Day"
 msgstr "1 Tag"
 
-#: omniportal.py:94
+#: omniportal.py:146
 msgid "3 Days"
 msgstr "3 Tage"
 
-#: omniportal.py:95
+#: omniportal.py:147
 msgid "5 Days"
 msgstr "5 Tage"
 
-#: omniportal.py:96
+#: omniportal.py:148
 msgid "7 Days"
 msgstr "7 Tage"
 
-#: omniportal.py:97
+#: omniportal.py:149
 msgid "14 Days"
 msgstr "14 Tage"
 
-#: omniportal.py:98
+#: omniportal.py:150
 msgid "30 Days"
 msgstr "30 Tage"
 
-#: omniportal.py:227
-msgid "Default credentials created: admin/admin123 to login!"
-msgstr "Initiale Zugangsdaten wurden erstellt: admin/admin123 für die Anmeldung"
+#: omniportal.py:154
+msgid ""
+"The field can only contain ASCII characters 0x20-0x7E. Length 6-16 "
+"characters"
+msgstr "Dieses Feld kann nur ASCII Zeichen 0x20-0x7E enthalten. Länge 6-16 Zeichen"
 
-#: omniportal.py:277
+#: omniportal.py:160
+msgid "Request Password Change Link"
+msgstr "Link zur Passwortänderung anfordern"
+
+#: omniportal.py:249 omniportal.py:266 omniportal.py:896 omniportal.py:963
+msgid "Your system doesn't provide a secure random generator!"
+msgstr "Das System bietet keinen sicheren Zufallsgenerator!"
+
+#: omniportal.py:392
+msgid "Default credentials created: admin/%(pw) to login!"
+msgstr "Initiale Zugangsdaten wurden erstellt: admin/%(pw) für die Anmeldung"
+
+#: omniportal.py:444
 msgid "The settings were saved!"
 msgstr "Die Einstellungen wurden gespeichert!"
 
-#: omniportal.py:282
+#: omniportal.py:449
 msgid "Something went wrong!"
 msgstr "Es ist etwas schiefgegangen!"
 
-#: omniportal.py:303
+#: omniportal.py:465
 msgid "The user was successfully created!"
-msgstr "Der Benutzer wurder erfolgreich erstellt!"
+msgstr "Der Benutzer wurde erfolgreich erstellt!"
 
-#: omniportal.py:308
+#: omniportal.py:470
 msgid "The user you try to create already exists!"
 msgstr "Der Benutzer existiert bereits!"
 
-#: omniportal.py:324
+#: omniportal.py:486
 msgid "The password was updated!"
 msgstr "Das Passwort wurde geändert!"
 
-#: omniportal.py:329
+#: omniportal.py:491
 msgid "The password wasn't updated!"
 msgstr "Das Passwort wurde nicht geändert!"
 
-#: omniportal.py:343
+#: omniportal.py:505
 msgid "The user was removed!"
 msgstr "Der Benutzer wurde entfernt!"
 
-#: omniportal.py:348
+#: omniportal.py:510
 msgid "You cannot delete yourself!"
 msgstr "Der eigene Benutzer kann nicht gelöscht werden!"
 
-#: omniportal.py:362
+#: omniportal.py:524
 msgid "Login successful!"
 msgstr "Anmeldung erfolgreich!"
 
-#: omniportal.py:367
+#: omniportal.py:529
 msgid "Invalid username/password!"
 msgstr "Ungültiger Benutzername/Passwort!"
 
-#: omniportal.py:394 omniportal.py:422 omniportal.py:500
+#: omniportal.py:556 omniportal.py:874 omniportal.py:951
 msgid "Login to OmniVista UPAM failed! Wrong username or password!"
 msgstr ""
 "Die Anmeldung an OmniVista UPAM ist fehlgeschlagen! Falscher Benutzername"
 " oder Passwort!"
 
-#: omniportal.py:444 omniportal.py:512
-msgid "Your system doesn't provide a secure random generator!"
-msgstr "Das System bietet keinen sicheren Zufallsgenerator!"
+#: omniportal.py:622
+msgid "Can't read omniportal_employees.json file, you'll need your backup!"
+msgstr "Fehler beim Lesen der omniportal_employees.json. Das Backup wird benötigt!"
 
-#: omniportal.py:479 omniportal.py:543
+#: omniportal.py:646
+msgid "Never"
+msgstr "Niemals"
+
+#: omniportal.py:656 omniportal.py:737
+msgid "Configuration missing for OmniVista URL, Username or Password!"
+msgstr "Einstellung für OmniVista URL, Benutzername oder Passwort fehlt!"
+
+#: omniportal.py:665
+msgid "An employee account for this email-address already exists!"
+msgstr "Ein Zugang für diese eMailadresse existiert bereits!"
+
+#: omniportal.py:699 omniportal.py:765
+msgid "An employee account with this username already exists!"
+msgstr "Ein Zugang mit diesem Benutzernamen existiert bereits!"
+
+#: omniportal.py:702 omniportal.py:768
+msgid "Illegal parameters given!"
+msgstr "Ungültige Parameter angegeben!"
+
+#: omniportal.py:705
+msgid "An error occured! Creating employee account failed!"
+msgstr "Ein Fehler ist aufgetreten! Der Zugang wurde nicht erstellt!"
+
+#: omniportal.py:708
+msgid "The employee account was created!"
+msgstr "Der Mitarbeiterzugang wurde angelegt!"
+
+#: omniportal.py:771
+msgid "An error occured! Updating employee account failed!"
+msgstr "Ein Fehler ist aufgetreten! Der Zugang wurde nicht aktualisiert!"
+
+#: omniportal.py:774
+msgid "The employee account/password was updated!"
+msgstr "Der Mitarbeiterzugang wurde aktualisiert!"
+
+#: omniportal.py:792 omniportal.py:808 omniportal.py:824
+msgid "Change Employee Password"
+msgstr "Passwort ändern"
+
+#: omniportal.py:794 omniportal.py:797 omniportal.py:827 omniportal.py:831
+#: omniportal.py:854
+msgid ""
+"Invalid email or change_token specified! This incident will be "
+"investigated!"
+msgstr ""
+"Ungültige Emailadresse oder Sicherheitstoken verwendet! Dieser Vorfall "
+"wird geprüft!"
+
+#: omniportal.py:800 omniportal.py:834
+msgid "There are no employees registered yet!"
+msgstr "Es sind noch keine Mitarbeiter registriert!"
+
+#: omniportal.py:804 omniportal.py:839
+msgid "Request password change for employee"
+msgstr "Passwortänderung für Mitarbeiter anfordern"
+
+#: omniportal.py:849
+msgid "An email containing a link to change your password has been sent!"
+msgstr "Eine Email mit einem Link zur Passwortänderung wurde versendet!"
+
+#: omniportal.py:857
+msgid "Invalid route!"
+msgstr "Ungültiger Aufruf!"
+
+#: omniportal.py:930 omniportal.py:994
 msgid "An account with this username already exists!"
 msgstr "Ein Zugang mit diesem Benutzernamen existiert bereits!"
 
-#: omniportal.py:484 omniportal.py:548
+#: omniportal.py:935 omniportal.py:999
 msgid "The guest account was created!"
 msgstr "Der Gastzugang wurde angelegt!"
 
-#: omniportal.py:582
-msgid "Failed to deliver to ALE VNA!"
-msgstr "Fehler bei der Verbindung zu ALE VNA!"
-
-#: omniportal.py:636 omniportal.py:758
+#: omniportal.py:1013 omniportal.py:1078 omniportal.py:1200
 msgid "Guest Access to Stellar Wireless"
 msgstr "Gastzugang zu Stellar Wireless"
 
-#: omniportal.py:664 omniportal.py:786
+#: omniportal.py:1014 omniportal.py:1106 omniportal.py:1228
 msgid "Wi-Fi Network:"
 msgstr "Wi-Fi Netzwerk:"
 
-#: omniportal.py:668 omniportal.py:790
+#: omniportal.py:1015 omniportal.py:1110 omniportal.py:1232
 msgid "Username:"
 msgstr "Benutzername:"
 
-#: omniportal.py:672 omniportal.py:794
+#: omniportal.py:1016 omniportal.py:1114 omniportal.py:1236
 msgid "Password:"
 msgstr "Passwort:"
 
-#: omniportal.py:676 omniportal.py:798
+#: omniportal.py:1017 omniportal.py:1118 omniportal.py:1240
 msgid "Access valid until:"
 msgstr "Zugang gültig bis:"
 
-#: omniportal.py:680 omniportal.py:802
+#: omniportal.py:1018 omniportal.py:1122 omniportal.py:1244
 msgid "Your contact person:"
 msgstr "Ansprechpartner:"
 
-#: omniportal.py:705
+#: omniportal.py:1032
+msgid "Failed to deliver to ALE VNA!"
+msgstr "Fehler bei der Verbindung zu ALE VNA!"
+
+#: omniportal.py:1147
 msgid "Sending card via RingCentral webhook failed!"
 msgstr "Fehler bei der Verbindung zu RingCentral/Rainbow Office!"
 
-#: omniportal.py:837
+#: omniportal.py:1282
 msgid "Valid From"
 msgstr "Gültig von"
+
+#: omniportal.py:1284 omniportal.py:1387
+msgid "Actions"
+msgstr "Aktionen"
+
+#: omniportal.py:1368
+msgid "An email containing a link to change the password has been sent!"
+msgstr "Eine Email mit einem Link zur Passwortänderung wurde versendet!"
+
+#: omniportal.py:1371
+msgid "There was no account found for a user/employee with this email address!"
+msgstr ""
+"Es wurde kein Konto für einen Mitarbeiter mit dieser Emailadresse "
+"gefunden!"
+
+#: omniportal.py:1386
+msgid "Last successful password change"
+msgstr "Letzte erfolgreiche Passwortänderung"
+
+#: templates/add_employee.html:5 templates/add_employee.html:14
+#: templates/base.html:54
+msgid "Add Employee"
+msgstr "Mitarbeiter hinzufügen"
 
 #: templates/add_guest.html:11
 msgid "ExpressGuest"
@@ -268,31 +416,37 @@ msgstr "ExpressGast"
 msgid "Home"
 msgstr "Startseite"
 
-#: templates/base.html:47
+#: templates/base.html:48
 msgid "Add Guest"
 msgstr "Gast hinzufügen"
 
-#: templates/base.html:48 templates/guest_accounts.html:5
-#: templates/guest_accounts.html:11
+#: templates/base.html:49 templates/guest_accounts.html:6
+#: templates/guest_accounts.html:12
 msgid "Guest Accounts"
 msgstr "Gastzugänge"
 
-#: templates/base.html:50
+#: templates/base.html:55 templates/employee_accounts.html:6
+#: templates/employee_accounts.html:12 templates/employee_local_accounts.html:6
+#: templates/employee_local_accounts.html:12
+msgid "Employee Accounts"
+msgstr "Mitarbeiterzugänge"
+
+#: templates/base.html:58
+msgid "Employee Passwords"
+msgstr "Mitarbeiterpasswörter"
+
+#: templates/base.html:61
 msgid "Add User"
 msgstr "Benutzer hinzufügen"
 
-#: templates/base.html:52 templates/change_settings.html:5
+#: templates/base.html:63 templates/change_settings.html:5
 #: templates/change_settings.html:11
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: templates/base.html:55
+#: templates/base.html:68
 msgid "Log Out"
 msgstr "Abmelden"
-
-#: templates/base.html:59
-msgid "test"
-msgstr "TestDE"
 
 #: templates/index.html:11
 msgid "Welcome"
@@ -309,4 +463,27 @@ msgstr "Anmelden um anzufangen!"
 #: templates/login.html:11
 msgid "Login"
 msgstr "Anmeldung"
+
+#: templates/test_guest.html:5 templates/test_guest.html:14
+#, fuzzy
+msgid "Test Guest"
+msgstr "Gast"
+
+#~ msgid "Wi-Fi / SSID Name"
+#~ msgstr "Wi-Fi / SSID Name"
+
+#~ msgid "OmniVista 2500 NMS / OmniVista Cirrus API Key"
+#~ msgstr ""
+
+#~ msgid "Mobile"
+#~ msgstr ""
+
+#~ msgid "The field can only contain 0-9 +"
+#~ msgstr ""
+
+#~ msgid "Telephone (Mobile)"
+#~ msgstr ""
+
+#~ msgid "Status"
+#~ msgstr ""
 

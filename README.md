@@ -1,5 +1,6 @@
 
 [![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/build.yml/badge.svg)](https://github.com/BennyE/omniportal)
+[![Github Badge](https://github.com/BennyE/omniportal/actions/workflows/development.yml/badge.svg?branch=dev)](https://github.com/BennyE/omniportal)
 [![Badge](https://img.shields.io/badge/amd64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
 [![Badge](https://img.shields.io/badge/arm-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
 [![Badge](https://img.shields.io/badge/arm64-Available%20on%20Quay%2Eio-30c452.svg)](https://quay.io/bennye_hh/omniportal)
@@ -26,9 +27,9 @@ This is work-in-progress, so expect rough edges! **I strongly recommend to work 
 
 - ~~You'll want to update your **app.secret_key** before you do anything else~~ (all automated in current build)
 - Navigate to 127.0.0.1:5000 (you don't want to run **debug** if outside of development phase)
-- Attempt to login with admin/admin123, the attempt will fail and inform you that "admin/admin123" account was created in **omniportal_users.json**
+- Attempt to login with admin/admin123, the attempt will fail and inform you that "admin/"`<Take note of your random password!>` account was created in **omniportal_users.json** 
 - Navigate to /admin and do your settings
-- Change your password! Please don't use something valuable, as the **omniportal_users.json** stores this unencrypted (as of now)!
+- Change your password! ~~Please don't use something valuable, as the **omniportal_users.json** stores this unencrypted (as of now)!~~ **DONE >= v0.0.6** 
 
 ### Run OmniPortal in Docker (local build)
 
@@ -163,7 +164,7 @@ deployment.apps/omniportal created
 ingress.networking.k8s.io/ingress-omniportal created
 ```
 
-### What if OmniPortal doesn't work in Rancher Desktop?
+### What if OmniPortal doesn't work in Rancher Desktop (or k3s/k8s)?
 
 #### Readiness probe failed
 
@@ -235,6 +236,8 @@ ingress-omniportal   <none>   omniportal.127.0.0.1.sslip.io   192.168.11.197   8
 
 OmniPortal uses a local-path storage class. In Rancher Desktop this can be found **inside** the `lima-rancher-desktop` VM.
 
+You may need to access this to remove/edit files after changes that are marked as `BREAKING-CHANGE`!
+
 ```
 benny@Bennys-MacBook-Pro deploy % kubectl get pv    
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                   STORAGECLASS   REASON   AGE
@@ -250,6 +253,17 @@ pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal
 lima-rancher-desktop:/var/lib/rancher/k3s/storage# cd pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal/
 lima-rancher-desktop:/var/lib/rancher/k3s/storage/pvc-dabe3ec3-61e8-4266-96c6-793c1ce04112_omniportal_omniportal# ls
 omniportal_secret_key.json  omniportal_users.json
+```
+
+#### Access logs of the pod
+
+```
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+omniportal-6f8747c587-bsqkk   1/1     Running   0          159m
+benny@Bennys-MacBook-Pro deploy % kubectl -n omniportal logs omniportal-6f8747c587-bsqkk
+ * Serving Flask app 'omniportal'
+ * Debug mode: off
 ```
 
 ## i18n
@@ -270,7 +284,7 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 
 ## TODO & Ideas to be evaluated
 
-1. "Guest" and "Admin"-role are the two only roles taken into account so far
+1. ~~"Guest" and "Admin"-role are the two only roles taken into account so far~~ **DONE >= v0.0.6** `BREAKING-CHANGE`
 2. There is no logic yet that handles "running on OmniSwitch with AOS R8"
 3. No Adaptive Card is sent yet after creating the Employee account
 4. Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
@@ -280,11 +294,14 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 8. ~~Create Dockerfile & distribute via Quay.io~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
 9. ~~Figure out how to setup & deploy OmniPortal to Rancher Desktop (k3s/k8s)~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
 10. ~~Setup fully automated GitHub Actions Workflow for multi-architecture container images~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
-11. Store OmniPortal passwords only as a hash
+11. ~~Store OmniPortal passwords only as a hash~~ **DONE >= v0.0.6** `BREAKING-CHANGE`
 12. Integrate with Grafana/Prometheus
 13. ~~Update Dockerfile to do `apt update`, `apt dist-upgrade` & `apt clean` to collect latest updates~~ **DONE >= v0.0.3**
 14. ~~Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest~~ **DONE >= v0.0.3** 
 15. ~~Switch to Python v3.9 Alpine Linux image to make the security scanner of Quay.io happy~~ **DONE >= v0.0.4**
+16. Update function for undesireable words in username/password
+17. ~~Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud~~ **DONE >= v0.0.6**
+18. Evaluate an escalation if password modifiction is attempted with wrong token
 
 ## Screenshot
 

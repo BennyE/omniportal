@@ -1,0 +1,38 @@
+{% from 'bootstrap5/table.html' import render_table %}
+{% from 'bootstrap5/utils.html' import render_icon %}
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{ _('Employee Accounts') }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>
+{{ _('Employee Accounts') }}
+</p>
+
+<table class="table">
+    <tr>
+        {% for title in titles %}
+        <th>{{ title[1] }}</th>
+        {% endfor %}
+    </tr>
+    {% for user,nested in data.items() %}
+    <tr>
+        <td>{{ user }}</td>
+        <td>{{ nested.user_id }}</td>
+        <td>{{ nested.pw_timestamp }}</td>
+
+        <td>
+            &nbsp;
+            <a class="text-dark text-decoration-none" href="{{ url_for('employee_accounts', user_email=user, action='send_change_password_mail') }}">{{ render_icon('envelope-exclamation') }}</a>
+            &nbsp;&nbsp;&nbsp;
+            <a class="text-dark text-decoration-none" href="{{ url_for('employee_accounts', user_email=user, action='delete_employee') }}">{{ render_icon('trash-fill') }}</a>
+            &nbsp;
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
