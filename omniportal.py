@@ -157,7 +157,7 @@ class ChangeEmployeePasswordWithToken(FlaskForm):
 
 class RequestEmployeePasswordChange(FlaskForm):
     email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
-    submit = SubmitField(label=_l('Change Password'))
+    submit = SubmitField(label=_l('Request Password Change Link'))
 
 @babel.localeselector
 def get_locale():
@@ -389,7 +389,7 @@ def valid_login(username, password):
                     return True
     except FileNotFoundError:
         random_password = create_default_op_users()
-        flash(_('Default credentials created: admin/%s(pw) to login!', pw=random_password), 'success')
+        flash(_('Default credentials created: admin/%(pw) to login!', pw=random_password), 'success')
         return False
 
 def log_the_user_in(username):

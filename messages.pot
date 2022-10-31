@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-10-29 20:11+0200\n"
+"POT-Creation-Date: 2022-10-31 22:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Generated-By: Babel 2.10.3\n"
 
 #: omniportal.py:60 omniportal.py:65 omniportal.py:76 omniportal.py:128
-#: omniportal.py:141 omniportal.py:1157 omniportal.py:1234
+#: omniportal.py:141 omniportal.py:1281 omniportal.py:1382
 msgid "Username"
 msgstr ""
 
@@ -35,7 +35,7 @@ msgstr ""
 msgid "The password doesn't meet the requirements"
 msgstr ""
 
-#: omniportal.py:62 templates/base.html:69
+#: omniportal.py:62 templates/base.html:70
 msgid "Log In"
 msgstr ""
 
@@ -67,16 +67,16 @@ msgstr ""
 msgid "Current Password"
 msgstr ""
 
-#: omniportal.py:72
+#: omniportal.py:72 omniportal.py:154
 msgid "New Password"
 msgstr ""
 
-#: omniportal.py:73 templates/base.html:66 templates/change_password.html:5
-#: templates/change_password.html:11
+#: omniportal.py:73 omniportal.py:156 templates/base.html:67
+#: templates/change_password.html:5 templates/change_password.html:11
 msgid "Change Password"
 msgstr ""
 
-#: omniportal.py:77 templates/base.html:61 templates/remove_user.html:5
+#: omniportal.py:77 templates/base.html:62 templates/remove_user.html:5
 #: templates/remove_user.html:11
 msgid "Remove User"
 msgstr ""
@@ -157,11 +157,12 @@ msgstr ""
 msgid "Save Settings"
 msgstr ""
 
-#: omniportal.py:128 omniportal.py:136 omniportal.py:141
+#: omniportal.py:128 omniportal.py:136 omniportal.py:141 omniportal.py:153
+#: omniportal.py:159
 msgid "The field can only contain 0-9 a-z A-Z / . - : _ @"
 msgstr ""
 
-#: omniportal.py:131 omniportal.py:1159
+#: omniportal.py:131 omniportal.py:1283
 msgid "Valid Until"
 msgstr ""
 
@@ -174,7 +175,7 @@ msgstr ""
 msgid "Create Guest"
 msgstr ""
 
-#: omniportal.py:136 omniportal.py:1233
+#: omniportal.py:136 omniportal.py:153 omniportal.py:159 omniportal.py:1381
 msgid "Email"
 msgstr ""
 
@@ -206,136 +207,192 @@ msgstr ""
 msgid "30 Days"
 msgstr ""
 
-#: omniportal.py:239 omniportal.py:256 omniportal.py:772 omniportal.py:839
+#: omniportal.py:154
+msgid ""
+"The field can only contain ASCII characters 0x20-0x7E. Length 6-16 "
+"characters"
+msgstr ""
+
+#: omniportal.py:160
+msgid "Request Password Change Link"
+msgstr ""
+
+#: omniportal.py:249 omniportal.py:266 omniportal.py:896 omniportal.py:963
 msgid "Your system doesn't provide a secure random generator!"
 msgstr ""
 
-#: omniportal.py:382
-#, python-format
-msgid "Default credentials created: admin/%s(pw) to login!"
+#: omniportal.py:392
+msgid "Default credentials created: admin/%(pw) to login!"
 msgstr ""
 
-#: omniportal.py:434
+#: omniportal.py:444
 msgid "The settings were saved!"
 msgstr ""
 
-#: omniportal.py:439
+#: omniportal.py:449
 msgid "Something went wrong!"
 msgstr ""
 
-#: omniportal.py:455
+#: omniportal.py:465
 msgid "The user was successfully created!"
 msgstr ""
 
-#: omniportal.py:460
+#: omniportal.py:470
 msgid "The user you try to create already exists!"
 msgstr ""
 
-#: omniportal.py:476
+#: omniportal.py:486
 msgid "The password was updated!"
 msgstr ""
 
-#: omniportal.py:481
+#: omniportal.py:491
 msgid "The password wasn't updated!"
 msgstr ""
 
-#: omniportal.py:495
+#: omniportal.py:505
 msgid "The user was removed!"
 msgstr ""
 
-#: omniportal.py:500
+#: omniportal.py:510
 msgid "You cannot delete yourself!"
 msgstr ""
 
-#: omniportal.py:514
+#: omniportal.py:524
 msgid "Login successful!"
 msgstr ""
 
-#: omniportal.py:519
+#: omniportal.py:529
 msgid "Invalid username/password!"
 msgstr ""
 
-#: omniportal.py:546 omniportal.py:750 omniportal.py:827
+#: omniportal.py:556 omniportal.py:874 omniportal.py:951
 msgid "Login to OmniVista UPAM failed! Wrong username or password!"
 msgstr ""
 
-#: omniportal.py:627
+#: omniportal.py:622
+msgid "Can't read omniportal_employees.json file, you'll need your backup!"
+msgstr ""
+
+#: omniportal.py:646
 msgid "Never"
 msgstr ""
 
-#: omniportal.py:637
+#: omniportal.py:656 omniportal.py:737
 msgid "Configuration missing for OmniVista URL, Username or Password!"
 msgstr ""
 
-#: omniportal.py:644
+#: omniportal.py:665
 msgid "An employee account for this email-address already exists!"
 msgstr ""
 
-#: omniportal.py:678
+#: omniportal.py:699 omniportal.py:765
 msgid "An employee account with this username already exists!"
 msgstr ""
 
-#: omniportal.py:681
+#: omniportal.py:702 omniportal.py:768
 msgid "Illegal parameters given!"
 msgstr ""
 
-#: omniportal.py:684
+#: omniportal.py:705
 msgid "An error occured! Creating employee account failed!"
 msgstr ""
 
-#: omniportal.py:687
+#: omniportal.py:708
 msgid "The employee account was created!"
 msgstr ""
 
-#: omniportal.py:806 omniportal.py:870
+#: omniportal.py:771
+msgid "An error occured! Updating employee account failed!"
+msgstr ""
+
+#: omniportal.py:774
+msgid "The employee account/password was updated!"
+msgstr ""
+
+#: omniportal.py:792 omniportal.py:808 omniportal.py:824
+msgid "Change Employee Password"
+msgstr ""
+
+#: omniportal.py:794 omniportal.py:797 omniportal.py:827 omniportal.py:831
+#: omniportal.py:854
+msgid ""
+"Invalid email or change_token specified! This incident will be "
+"investigated!"
+msgstr ""
+
+#: omniportal.py:800 omniportal.py:834
+msgid "There are no employees registered yet!"
+msgstr ""
+
+#: omniportal.py:804 omniportal.py:839
+msgid "Request password change for employee"
+msgstr ""
+
+#: omniportal.py:849
+msgid "An email containing a link to change your password has been sent!"
+msgstr ""
+
+#: omniportal.py:857
+msgid "Invalid route!"
+msgstr ""
+
+#: omniportal.py:930 omniportal.py:994
 msgid "An account with this username already exists!"
 msgstr ""
 
-#: omniportal.py:811 omniportal.py:875
+#: omniportal.py:935 omniportal.py:999
 msgid "The guest account was created!"
 msgstr ""
 
-#: omniportal.py:889 omniportal.py:954 omniportal.py:1076
+#: omniportal.py:1013 omniportal.py:1078 omniportal.py:1200
 msgid "Guest Access to Stellar Wireless"
 msgstr ""
 
-#: omniportal.py:890 omniportal.py:982 omniportal.py:1104
+#: omniportal.py:1014 omniportal.py:1106 omniportal.py:1228
 msgid "Wi-Fi Network:"
 msgstr ""
 
-#: omniportal.py:891 omniportal.py:986 omniportal.py:1108
+#: omniportal.py:1015 omniportal.py:1110 omniportal.py:1232
 msgid "Username:"
 msgstr ""
 
-#: omniportal.py:892 omniportal.py:990 omniportal.py:1112
+#: omniportal.py:1016 omniportal.py:1114 omniportal.py:1236
 msgid "Password:"
 msgstr ""
 
-#: omniportal.py:893 omniportal.py:994 omniportal.py:1116
+#: omniportal.py:1017 omniportal.py:1118 omniportal.py:1240
 msgid "Access valid until:"
 msgstr ""
 
-#: omniportal.py:894 omniportal.py:998 omniportal.py:1120
+#: omniportal.py:1018 omniportal.py:1122 omniportal.py:1244
 msgid "Your contact person:"
 msgstr ""
 
-#: omniportal.py:908
+#: omniportal.py:1032
 msgid "Failed to deliver to ALE VNA!"
 msgstr ""
 
-#: omniportal.py:1023
+#: omniportal.py:1147
 msgid "Sending card via RingCentral webhook failed!"
 msgstr ""
 
-#: omniportal.py:1158
+#: omniportal.py:1282
 msgid "Valid From"
 msgstr ""
 
-#: omniportal.py:1160 omniportal.py:1239
+#: omniportal.py:1284 omniportal.py:1387
 msgid "Actions"
 msgstr ""
 
-#: omniportal.py:1238
+#: omniportal.py:1368
+msgid "An email containing a link to change the password has been sent!"
+msgstr ""
+
+#: omniportal.py:1371
+msgid "There was no account found for a user/employee with this email address!"
+msgstr ""
+
+#: omniportal.py:1386
 msgid "Last successful password change"
 msgstr ""
 
@@ -367,16 +424,20 @@ msgstr ""
 msgid "Employee Accounts"
 msgstr ""
 
-#: templates/base.html:60
+#: templates/base.html:58
+msgid "Employee Passwords"
+msgstr ""
+
+#: templates/base.html:61
 msgid "Add User"
 msgstr ""
 
-#: templates/base.html:62 templates/change_settings.html:5
+#: templates/base.html:63 templates/change_settings.html:5
 #: templates/change_settings.html:11
 msgid "Settings"
 msgstr ""
 
-#: templates/base.html:67
+#: templates/base.html:68
 msgid "Log Out"
 msgstr ""
 

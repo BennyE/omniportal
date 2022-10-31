@@ -26,9 +26,9 @@
 
         <td>
             &nbsp;
-            <a href="{{ url_for('employee_accounts', user_email=user, action='send_change_password_mail') }}">{{ render_icon('envelope-exclamation') }}</a>
+            <a class="text-dark text-decoration-none" href="{{ url_for('employee_accounts', user_email=user, action='send_change_password_mail') }}">{{ render_icon('envelope-exclamation') }}</a>
             &nbsp;&nbsp;&nbsp;
-            <a href="{{ url_for('employee_accounts', user_email=user, action='delete_employee') }}">{{ render_icon('trash-fill') }}</a>
+            <a class="text-dark text-decoration-none" href="{{ url_for('employee_accounts', user_email=user, action='delete_employee') }}">{{ render_icon('trash-fill') }}</a>
             &nbsp;
         </td>
     </tr>
