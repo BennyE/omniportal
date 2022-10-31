@@ -647,6 +647,16 @@ def write_employee_to_file(new_employee_mail, new_employee_id, new_employee_ov_i
         op_employees.write(json.dumps(users))
         return change_token
 
+def remove_employee_from_file(employee_mail):
+    with open(op_employeefile, "r") as op_employees:
+        users = json.loads(op_employees.read())
+        if employee_mail not in users.keys():
+            return False
+    with open(op_employeefile, "w") as op_employees:
+        users.pop(employee_mail)
+        op_employees.write(json.dumps(users))
+        return True
+
 def create_employee_account(email):
     # TODO: send email with link to change password
     # TODO: Test without configuration!
@@ -775,6 +785,41 @@ def update_employee_account(username, ov_user_id, password):
 
     ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
     print(ov_logout.status_code, ov_logout.reason, "OV - Update Employee - Logout")
+    req.close()
+    return True
+
+def remove_employee_account(ov_user_id):
+
+    settings = read_settings()
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
+        return False
+
+    req = requests.Session()
+
+    login_header = {
+        "Content-Type":"application/json"
+    }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV - Remove Employee - LOGIN")
+    
+    employee_data = []
+    employee_data.append(ov_user_id)
+
+    resp_remove_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/deleteAccount", headers=login_header, json=employee_data, verify=settings['check_certs'])
+    print(resp_remove_employee.status_code, resp_remove_employee.reason, "OV - Remove Employee")
+    if resp_remove_employee.json()['data'][0]['status'] != True:
+        return False
+    print(resp_remove_employee.json())
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV - Remove Employee - Logout")
     req.close()
     return True
 
@@ -1352,14 +1397,6 @@ def employee_accounts(user_email=None):
 
     if not employee_data:
         return redirect(url_for('index'))
-    # Delete = /api/ham/userAccount/deleteAccount
-    # Post ID to delete
-    # result	"upam.deleteSuccess.employeeAccount"
-    # 
-    #employee_accounts = get_employee_accounts()
-    #employee_data = employee_accounts['data']
-
-    print(request.args)
 
     if (request.method == "GET" and user_email and (request.args.get("action") == "send_change_password_mail")):
         if user_email in employee_data.keys():
@@ -1370,9 +1407,30 @@ def employee_accounts(user_email=None):
         else:
             flash(_("There was no account found for a user/employee with this email address!"))
             return redirect(url_for('employee_accounts'))
-    elif (request.method == "GET" and user_email and request.args.get("action=delete_employee")):
-        # TODO: Add delete function
-        pass
+    elif (request.method == "GET" and user_email and (request.args.get("action") == "delete_employee")):
+        if user_email in employee_data.keys():
+            ov_result = remove_employee_account(employee_data[user_email]['ovid'])
+            if ov_result:
+                local_result = remove_employee_from_file(user_email)
+                if local_result:
+                    flash(_("Successfully removed the employee from all databases!"), "success")
+                return redirect(url_for('employee_accounts'))
+            else:
+                flash(_("Removing the employee account from OmniVista failed!"), "danger")
+                flash(url_for('employee_accounts', _external=True, user_email=user_email, action='delete_employee_local_only'))
+                return redirect(url_for('employee_accounts'))  
+        else:
+            flash(_("There was no account found for a user/employee with this email address!"))
+            return redirect(url_for('employee_accounts'))
+    elif (request.method == "GET" and user_email and (request.args.get("action") == "delete_employee_local_only")):
+        if user_email in employee_data.keys():
+            local_result = remove_employee_from_file(user_email)
+            if local_result:
+                flash(_("Successfully removed the employee from local database!"), "success")
+            return redirect(url_for('employee_accounts'))
+        else:
+            flash(_("There was no account found for a user/employee with this email address!"))
+            return redirect(url_for('employee_accounts'))        
     else:
         #print(employee_data)
         # >>> request.host

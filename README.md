@@ -13,6 +13,7 @@ The idea is that OmniPortal can be hosted on Alcatel-Lucent Enterprise OmniSwitc
 ## Run OmniPortal
 
 You have multiple options to run OmniPortal
+- I recommend to regularly take a backup of your ~/conf/ directory at a secure place
 
 ### Run OmniPortal (locally on your machine)
 
@@ -302,6 +303,8 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 16. Update function for undesireable words in username/password
 17. ~~Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud~~ **DONE >= v0.0.6**
 18. Evaluate an escalation if password modifiction is attempted with wrong token
+19. Offer an option to set $TZ in container runtime to address for UTC vs. local time (e.g. CET / Europe/Berlin)
+20. Implement email notifications
 
 ## Screenshot
 
