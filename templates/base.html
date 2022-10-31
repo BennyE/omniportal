@@ -55,6 +55,7 @@
                             {{ render_nav_item('employee_accounts', render_icon('people-fill') + _('Employee Accounts')) }}
                         {% endif %}
                   {% endif %}
+                  {{ render_nav_item('employee_pw', render_icon('fingerprint') + _('Employee Passwords')) }}
                   {% if g.user is not none and g.entitlement is not none %}
                         {% if "admin" in g.entitlement %}
                             {{ render_nav_item('create_user', render_icon('person-badge') + _('Add User')) }}

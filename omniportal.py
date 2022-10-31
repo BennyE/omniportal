@@ -149,6 +149,16 @@ class QuickGuestForm(FlaskForm):
     fourteen_days = SubmitField(_l('14 Days'))
     thirty_days = SubmitField(_l('30 Days'))
 
+class ChangeEmployeePasswordWithToken(FlaskForm):
+    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    password = PasswordField(_l('New Password'), validators=[Regexp(r'^[ -~]+$', message=_l('The field can only contain ASCII characters 0x20-0x7E. Length 6-16 characters')), Length(6, 16)])
+    change_token = HiddenField()
+    submit = SubmitField(label=_l('Change Password'))
+
+class RequestEmployeePasswordChange(FlaskForm):
+    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    submit = SubmitField(label=_l('Change Password'))
+
 @babel.localeselector
 def get_locale():
     available_translations = ["de", "en"]
@@ -556,6 +566,13 @@ def get_guest_accounts():
     req.get(f"{settings['guest_operator_url']}/sponsor/api/ham/guest/manager/logout")
     return resp_accounts.json()
 
+def get_local_employee_accounts():
+    data = read_employees_file()
+    if data:
+        return data
+    else:
+        return False
+
 def get_employee_accounts():
     settings = read_settings()
     req = requests.Session()
@@ -601,13 +618,22 @@ def read_employees_file():
     except FileNotFoundError:
         create_employee_file()
         return False
+    except json.decoder.JSONDecodeError:
+        flash(_("Can't read omniportal_employees.json file, you'll need your backup!"), "danger")
+        return False
     return users
 
-def update_employee_in_file(employee_mail):
+def update_employee_in_file(employee_mail, update_timestamp="yes"):
+    with open(op_employeefile, "r") as op_employees:
+        users = json.loads(op_employees.read())
+        if employee_mail not in users.keys():
+            return False    
     with open(op_employeefile, "w") as op_employees:
         change_token = secrets.token_urlsafe()
-        employee_mail[employee_mail] = {"change_token":change_token, "pw_timestamp":datetime.datetime.fromtimestamp(time.time()).strftime("%d.%m.%Y, %H:%M:%S")}
-        op_employees.write(json.dumps(employee_mail))
+        users[employee_mail]["change_token"] = change_token
+        if update_timestamp == "yes":
+            users[employee_mail]["pw_timestamp"] = datetime.datetime.fromtimestamp(time.time()).strftime("%d.%m.%Y, %H:%M:%S")
+        op_employees.write(json.dumps(users))
     return change_token
 
 def write_employee_to_file(new_employee_mail, new_employee_id, new_employee_ov_id):
@@ -622,14 +648,15 @@ def write_employee_to_file(new_employee_mail, new_employee_id, new_employee_ov_i
         return change_token
 
 def create_employee_account(email):
-    # send email with link to change password
+    # TODO: send email with link to change password
     # TODO: Test without configuration!
-    # check if account already exists
 
     settings = read_settings()
     if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
         flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
         return False
+
+    email = email.lower()
 
     existing_users = read_employees_file()
 
@@ -694,11 +721,141 @@ def create_employee_account(email):
             employee_ov_id = employee["id"]
             break
 
-    write_employee_to_file(email, random_employee_username, employee_ov_id)
+    change_token = write_employee_to_file(email, random_employee_username, employee_ov_id)
+    # TODO: Send mail and remove the print
+    print(url_for('employee_pw', user_email=email))
+    print(url_for('employee_pw', _external=True, user_email=email, change_token=change_token))
+
 
     ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
     print(ov_logout.status_code, ov_logout.reason, "OV - Add Employee - Logout")
     req.close()
+
+def update_employee_account(username, ov_user_id, password):
+    settings = read_settings()
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')
+        return False
+
+    req = requests.Session()
+
+    login_header = {
+        "Content-Type":"application/json"
+    }
+
+    login_data = {
+        "userName":settings['ove_ovc_username'],
+        "password":settings['ove_ovc_password']
+    }
+
+    ov_login = req.post(f"{settings['ove_ovc_url']}/api/login", headers=login_header, json=login_data, verify=settings['check_certs'])
+    print(ov_login.status_code, ov_login.reason, "OV - Update Employee - LOGIN")
+    
+    employee_data = {
+        "id": ov_user_id,
+        "repeat":password,
+        "username":username,
+        "password":password
+    }
+    print(employee_data)
+    resp_update_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/editAccount", headers=login_header, json=employee_data, verify=settings['check_certs'])
+    print(resp_update_employee.status_code, resp_update_employee.reason, "OV - Update Employee - Change Employee")
+    if resp_update_employee.json()['errorCode'] != 0:
+        if resp_update_employee.json()['errorMessage'] == "upam.usernameRepeat":
+            flash(_('An employee account with this username already exists!'))
+            return False
+        elif resp_update_employee.json()['errorMessage'] == "upam.parametersIllegal":
+            flash(_('Illegal parameters given!'))
+            return False
+        else:
+            flash(_("An error occured! Updating employee account failed!"))
+            return False
+    print(resp_update_employee.json())
+    flash(_('The employee account/password was updated!'), 'success')
+
+    ov_logout = req.get(f"{settings['ove_ovc_url']}/api/logout", headers=login_header, verify=settings['check_certs'])
+    print(ov_logout.status_code, ov_logout.reason, "OV - Update Employee - Logout")
+    req.close()
+    return True
+
+@app.route('/employee_pw/', methods=["POST", "GET"])
+@app.route('/employee_pw/<user_email>', methods=["POST", "GET"])
+def employee_pw(user_email=None):
+    if (request.method == "GET" and user_email and request.args.get('change_token')):
+
+        existing_users = read_employees_file()
+
+        if existing_users:
+            if user_email in existing_users.keys():
+                if existing_users[user_email]["change_token"] == request.args.get('change_token'):
+                    form = ChangeEmployeePasswordWithToken(email=user_email, change_token=request.args.get('change_token'))
+                    return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+                else:
+                    flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                    return redirect(url_for('index'))
+            else:
+                flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                return redirect(url_for('index'))
+        else:
+            flash(_("There are no employees registered yet!"))
+            return redirect(url_for('index'))
+    elif (request.method == "GET" and not user_email):
+        form = RequestEmployeePasswordChange()
+        return render_template("change_employee_password.html", title=_("Request password change for employee"), form=form)
+    elif (request.method == "POST" and user_email and request.args.get('change_token')):
+        form=ChangeEmployeePasswordWithToken()
+        if not form.validate_on_submit():
+            return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+
+        existing_users = read_employees_file()
+
+        if existing_users:
+            if request.form.get('email') in existing_users.keys():
+                if existing_users[request.form.get('email')]["change_token"] == request.form.get('change_token'):
+                    ov_username = existing_users[request.form.get('email')]['user_id']
+                    ov_user_id = existing_users[request.form.get('email')]['ovid']
+                    new_password = request.form.get('password')
+
+                    result = update_employee_account(ov_username, ov_user_id, new_password)
+                    if result:
+                        update_employee_in_file(request.form.get('email'))
+                        return redirect(url_for('index'))
+                    else:
+                        return render_template("change_employee_password.html", title=_("Change Employee Password"), form=form)
+                else:
+                    # TODO: ALERT 
+                    flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                    return redirect(url_for('index'))
+            else:
+                # TODO: ALERT
+                flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+                return redirect(url_for('index'))
+        else:
+            flash(_("There are no employees registered yet!"))
+            return redirect(url_for('index'))
+    elif (request.method == "POST" and not user_email):
+        form = RequestEmployeePasswordChange()
+        if not form.validate_on_submit():
+            return render_template("change_employee_password.html", title=_("Request password change for employee"), form=form)        
+        # TODO: Send email to user
+        #users = read_employees_file()
+        # Note that the function checks if the user exists and otherwise returns False
+        result = update_employee_in_file(request.form.get("email"), update_timestamp="no")
+        if result:
+            # TODO: Send mail
+            # flash message
+            print(url_for('employee_pw', user_email=request.form.get("email")))
+            print(url_for('employee_pw', _external=True, user_email=request.form.get("email"), change_token=result))
+            flash(_('An email containing a link to change your password has been sent!'), 'success')
+            return redirect(url_for('index'))
+        else:
+            # error message that will investigate
+            # TODO: Alert
+            flash(_("Invalid email or change_token specified! This incident will be investigated!"), "danger")
+            return redirect(url_for('index'))
+    else:
+        flash(_("Invalid route!"))
+        return redirect(url_for('index'))        
 
 def quick_guest_account(days):
     settings = read_settings()
@@ -1187,23 +1344,49 @@ def test_guest():
     return render_template("test_guest.html", form=form)
 
 @app.route("/employee_accounts")
+@app.route("/employee_accounts/<user_email>")
 #@login_required
 @employee_required
-def employee_accounts():
-    employee_accounts = get_employee_accounts()
-    employee_data = employee_accounts['data']
-    print(employee_data)
-    # >>> request.host
-    # 'omniportal2-127.0.0.1.sslip.io:5001'
-    titles = [
-        ('username', _('Username')),
-        ('email', _('Email')),
-        ('telephone', _('Telephone (Mobile)')),
-        ('status', _('Status')),
-        ('dateOfEffective', _('Valid From')),
-        ('actions', _('Actions'))
-    ]
-    return render_template("employee_accounts.html", data=employee_data, titles=titles)
+def employee_accounts(user_email=None):
+    employee_data = get_local_employee_accounts()
+
+    if not employee_data:
+        return redirect(url_for('index'))
+    # Delete = /api/ham/userAccount/deleteAccount
+    # Post ID to delete
+    # result	"upam.deleteSuccess.employeeAccount"
+    # 
+    #employee_accounts = get_employee_accounts()
+    #employee_data = employee_accounts['data']
+
+    print(request.args)
+
+    if (request.method == "GET" and user_email and (request.args.get("action") == "send_change_password_mail")):
+        if user_email in employee_data.keys():
+            print(url_for('employee_pw', user_email=user_email))
+            print(url_for('employee_pw', _external=True, user_email=user_email, change_token=employee_data[user_email]['change_token']))
+            flash(_('An email containing a link to change the password has been sent!'), 'success')
+            return redirect(url_for('employee_accounts'))
+        else:
+            flash(_("There was no account found for a user/employee with this email address!"))
+            return redirect(url_for('employee_accounts'))
+    elif (request.method == "GET" and user_email and request.args.get("action=delete_employee")):
+        # TODO: Add delete function
+        pass
+    else:
+        #print(employee_data)
+        # >>> request.host
+        # 'omniportal2-127.0.0.1.sslip.io:5001'
+        titles = [
+            ('email', _('Email')),
+            ('username', _('Username')),
+            # ('telephone', _('Telephone (Mobile)')),
+            # ('status', _('Status')),
+            # ('dateOfEffective', _('Valid From')),
+            ('last_change', _("Last successful password change")),
+            ('actions', _('Actions'))
+        ]
+        return render_template("employee_local_accounts.html", data=employee_data, titles=titles)
 
 @app.route("/add_employee", methods=["POST", "GET"])
 #@login_required

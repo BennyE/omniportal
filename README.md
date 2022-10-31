@@ -300,6 +300,8 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 14. ~~Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest~~ **DONE >= v0.0.3** 
 15. ~~Switch to Python v3.9 Alpine Linux image to make the security scanner of Quay.io happy~~ **DONE >= v0.0.4**
 16. Update function for undesireable words in username/password
+17. ~~Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud~~ **DONE >= v0.0.6**
+18. Evaluate an escalation if password modifiction is attempted with wrong token
 
 ## Screenshot
 
