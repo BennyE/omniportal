@@ -65,7 +65,7 @@ You'll find the files that store the configuration/settings in **/home/$USER/omn
 ### Run OmniPortal in Rancher Desktop / k3s / k8s
 
 You are able to run OmniPortal on your favorite flavour of kubernetes. The following outputs are taken from my Rancher Desktop on Apple MBP with Apple Silicon.
-The container images are available for `amd64`, `arm` & `arm64` from: ![quay.io/bennye_hh/omniportal](https://quay.io/bennye_hh/omniportal)
+The container images are available for `amd64`, `arm` & `arm64` from: [quay.io/bennye_hh/omniportal](https://quay.io/bennye_hh/omniportal)
 
 #### kubectl get nodes
 
