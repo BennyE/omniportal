@@ -1,5 +1,6 @@
 from flask_bootstrap import Bootstrap5
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Markup
 from flask_babel import Babel, _
 from flask_babel import lazy_gettext as _l
 from flask_wtf import FlaskForm
@@ -389,7 +390,7 @@ def valid_login(username, password):
                     return True
     except FileNotFoundError:
         random_password = create_default_op_users()
-        flash(_('Default credentials created: admin/%(pw) to login!', pw=random_password), 'success')
+        flash(_('Default credentials created: admin/%(pw)s to login!', pw=random_password), 'success')
         return False
 
 def log_the_user_in(username):
@@ -545,6 +546,11 @@ def get_guest_accounts():
     login_header = {
         "Content-Type":"application/json"
     }
+
+    if settings['guest_operator_url'] == "" or settings['guest_operator_username'] == "" or settings['guest_operator_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')        
+        return False
+
     login_data = {
         "username":settings['guest_operator_username'],
         "password":settings['guest_operator_password'],
@@ -580,6 +586,10 @@ def get_employee_accounts():
     login_header = {
         "Content-Type":"application/json"
     }
+
+    if settings['ove_ovc_url'] == "" or settings['ove_ovc_username'] == "" or settings['ove_ovc_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')        
+        return False
 
     login_data = {
         "userName":settings['ove_ovc_username'],
@@ -908,6 +918,11 @@ def quick_guest_account(days):
     login_header = {
         "Content-Type":"application/json"
     }
+
+    if settings['guest_operator_url'] == "" or settings['guest_operator_username'] == "" or settings['guest_operator_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')        
+        return redirect(url_for('index'))
+
     login_data = {
         "username":settings['guest_operator_username'],
         "password":settings['guest_operator_password'],
@@ -985,6 +1000,11 @@ def create_guest_account(guest_name, valid_until):
     login_header = {
         "Content-Type":"application/json"
     }
+
+    if settings['guest_operator_url'] == "" or settings['guest_operator_username'] == "" or settings['guest_operator_password'] == "":
+        flash(_('Configuration missing for OmniVista URL, Username or Password!'), 'danger')        
+        return redirect(url_for('index'))
+
     login_data = {
         "username":settings['guest_operator_username'],
         "password":settings['guest_operator_password'],
@@ -1320,6 +1340,10 @@ def timestamp_to_date(timestamp):
 def guest_accounts():
 
     guest_accounts = get_guest_accounts()
+
+    if not guest_accounts:
+        return redirect(url_for('index'))
+
     guest_data = guest_accounts['data']
 
     titles = [
@@ -1417,7 +1441,7 @@ def employee_accounts(user_email=None):
                 return redirect(url_for('employee_accounts'))
             else:
                 flash(_("Removing the employee account from OmniVista failed!"), "danger")
-                flash(url_for('employee_accounts', _external=True, user_email=user_email, action='delete_employee_local_only'))
+                flash(Markup(_('Click <a href=\"%(url)s\">here</a> to remove the local account only!', url=url_for('employee_accounts', _external=True, user_email=user_email, action='delete_employee_local_only'))))
                 return redirect(url_for('employee_accounts'))  
         else:
             flash(_("There was no account found for a user/employee with this email address!"))
