@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-11-01 21:41+0100\n"
+"POT-Creation-Date: 2022-11-03 00:23+0100\n"
 "PO-Revision-Date: 2022-08-27 16:18+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,8 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.3\n"
 
-#: omniportal.py:61 omniportal.py:66 omniportal.py:77 omniportal.py:129
-#: omniportal.py:142 omniportal.py:1350 omniportal.py:1465
+#: omniportal.py:61 omniportal.py:66 omniportal.py:77 omniportal.py:141
+#: omniportal.py:155 omniportal.py:1385 omniportal.py:1500
+#: templates/email_forgot_password.html:17
+#: templates/email_forgot_password.txt:5 templates/email_new_user.html:17
+#: templates/email_new_user.txt:5
 msgid "Username"
 msgstr "Benutzername"
 
@@ -68,11 +71,11 @@ msgstr "Benutzer hinzufügen"
 msgid "Current Password"
 msgstr "Aktuelles Passwort"
 
-#: omniportal.py:73 omniportal.py:155
+#: omniportal.py:73 omniportal.py:169
 msgid "New Password"
 msgstr "Neues Passwort"
 
-#: omniportal.py:74 omniportal.py:157 templates/base.html:67
+#: omniportal.py:74 omniportal.py:171 templates/base.html:67
 #: templates/change_password.html:5 templates/change_password.html:11
 msgid "Change Password"
 msgstr "Passwort ändern"
@@ -155,170 +158,198 @@ msgid "OmniVista 2500 NMS / OmniVista Cirrus Password"
 msgstr "OmniVista 2500 NMS / OmniVista Cirrus Passwort"
 
 #: omniportal.py:102
+msgid "SMTP Server"
+msgstr ""
+
+#: omniportal.py:103
+msgid "SMTP Authentication"
+msgstr "SMTP Authentifizierung"
+
+#: omniportal.py:104
+msgid "SMTP Port"
+msgstr ""
+
+#: omniportal.py:105
+msgid "SMTP User"
+msgstr "SMTP Benutzer"
+
+#: omniportal.py:106
+msgid "SMTP Password"
+msgstr "SMTP Passwort"
+
+#: omniportal.py:107
+msgid "From: Email address"
+msgstr "Von: Absender Emailadresse"
+
+#: omniportal.py:108
 msgid "Save Settings"
 msgstr "Einstellungen speichern"
 
-#: omniportal.py:129 omniportal.py:137 omniportal.py:142 omniportal.py:154
-#: omniportal.py:160
+#: omniportal.py:141 omniportal.py:155
 msgid "The field can only contain 0-9 a-z A-Z / . - : _ @"
 msgstr "Das Feld kann nur folgendene Inhalte haben 0-9 a-z A-Z / . - : _ @"
 
-#: omniportal.py:132 omniportal.py:1352
+#: omniportal.py:144 omniportal.py:1387
 msgid "Valid Until"
 msgstr "Gültig bis"
 
-#: omniportal.py:132
+#: omniportal.py:144
 msgid "Select the day until when the account should be valid!"
 msgstr "Tag auswählen bis zu welchem der Zugang gültig ist!"
 
-#: omniportal.py:133 omniportal.py:143 templates/add_guest.html:5
+#: omniportal.py:145 omniportal.py:156 templates/add_guest.html:5
 #: templates/add_guest.html:20
 msgid "Create Guest"
 msgstr "Gast hinzufügen"
 
-#: omniportal.py:137 omniportal.py:154 omniportal.py:160 omniportal.py:1464
+#: omniportal.py:150 omniportal.py:167 omniportal.py:174 omniportal.py:1499
 msgid "Email"
 msgstr ""
 
-#: omniportal.py:139
+#: omniportal.py:150 omniportal.py:167 omniportal.py:174
+msgid "The field requires a valid email-address."
+msgstr "Bitte eine gültige Email-Adresse eingeben!"
+
+#: omniportal.py:152
 msgid "Create Employee"
 msgstr "Mitarbeiter anlegen"
 
-#: omniportal.py:146
+#: omniportal.py:159
 msgid "1 Day"
 msgstr "1 Tag"
 
-#: omniportal.py:147
+#: omniportal.py:160
 msgid "3 Days"
 msgstr "3 Tage"
 
-#: omniportal.py:148
+#: omniportal.py:161
 msgid "5 Days"
 msgstr "5 Tage"
 
-#: omniportal.py:149
+#: omniportal.py:162
 msgid "7 Days"
 msgstr "7 Tage"
 
-#: omniportal.py:150
+#: omniportal.py:163
 msgid "14 Days"
 msgstr "14 Tage"
 
-#: omniportal.py:151
+#: omniportal.py:164
 msgid "30 Days"
 msgstr "30 Tage"
 
-#: omniportal.py:155
+#: omniportal.py:169
 msgid ""
 "The field can only contain ASCII characters 0x20-0x7E. Length 6-16 "
 "characters"
 msgstr "Dieses Feld kann nur ASCII Zeichen 0x20-0x7E enthalten. Länge 6-16 Zeichen"
 
-#: omniportal.py:161
+#: omniportal.py:176
 msgid "Request Password Change Link"
 msgstr "Link zur Passwortänderung anfordern"
 
-#: omniportal.py:250 omniportal.py:267 omniportal.py:956 omniportal.py:1028
+#: omniportal.py:265 omniportal.py:282 omniportal.py:991 omniportal.py:1063
 msgid "Your system doesn't provide a secure random generator!"
 msgstr "Das System bietet keinen sicheren Zufallsgenerator!"
 
-#: omniportal.py:393
+#: omniportal.py:421
+#, python-format
 msgid "Default credentials created: admin/%(pw)s to login!"
 msgstr "Initiale Zugangsdaten wurden erstellt: admin/%(pw)s für die Anmeldung"
 
-#: omniportal.py:445
+#: omniportal.py:479
 msgid "The settings were saved!"
 msgstr "Die Einstellungen wurden gespeichert!"
 
-#: omniportal.py:450
+#: omniportal.py:484
 msgid "Something went wrong!"
 msgstr "Es ist etwas schiefgegangen!"
 
-#: omniportal.py:466
+#: omniportal.py:500
 msgid "The user was successfully created!"
 msgstr "Der Benutzer wurde erfolgreich erstellt!"
 
-#: omniportal.py:471
+#: omniportal.py:505
 msgid "The user you try to create already exists!"
 msgstr "Der Benutzer existiert bereits!"
 
-#: omniportal.py:487
+#: omniportal.py:521
 msgid "The password was updated!"
 msgstr "Das Passwort wurde geändert!"
 
-#: omniportal.py:492
+#: omniportal.py:526
 msgid "The password wasn't updated!"
 msgstr "Das Passwort wurde nicht geändert!"
 
-#: omniportal.py:506
+#: omniportal.py:540
 msgid "The user was removed!"
 msgstr "Der Benutzer wurde entfernt!"
 
-#: omniportal.py:511
+#: omniportal.py:545
 msgid "You cannot delete yourself!"
 msgstr "Der eigene Benutzer kann nicht gelöscht werden!"
 
-#: omniportal.py:525
+#: omniportal.py:559
 msgid "Login successful!"
 msgstr "Anmeldung erfolgreich!"
 
-#: omniportal.py:530
+#: omniportal.py:564
 msgid "Invalid username/password!"
 msgstr "Ungültiger Benutzername/Passwort!"
 
-#: omniportal.py:551 omniportal.py:591 omniportal.py:676 omniportal.py:757
-#: omniportal.py:805 omniportal.py:923 omniportal.py:1005
+#: omniportal.py:585 omniportal.py:625 omniportal.py:710 omniportal.py:791
+#: omniportal.py:839 omniportal.py:958 omniportal.py:1040
 msgid "Configuration missing for OmniVista URL, Username or Password!"
 msgstr "Einstellung für OmniVista URL, Benutzername oder Passwort fehlt!"
 
-#: omniportal.py:562 omniportal.py:934 omniportal.py:1016
+#: omniportal.py:596 omniportal.py:969 omniportal.py:1051
 msgid "Login to OmniVista UPAM failed! Wrong username or password!"
 msgstr ""
 "Die Anmeldung an OmniVista UPAM ist fehlgeschlagen! Falscher Benutzername"
 " oder Passwort!"
 
-#: omniportal.py:632
+#: omniportal.py:666
 msgid "Can't read omniportal_employees.json file, you'll need your backup!"
 msgstr "Fehler beim Lesen der omniportal_employees.json. Das Backup wird benötigt!"
 
-#: omniportal.py:656
+#: omniportal.py:690
 msgid "Never"
 msgstr "Niemals"
 
-#: omniportal.py:685
+#: omniportal.py:719
 msgid "An employee account for this email-address already exists!"
 msgstr "Ein Zugang für diese eMailadresse existiert bereits!"
 
-#: omniportal.py:719 omniportal.py:785
+#: omniportal.py:753 omniportal.py:819
 msgid "An employee account with this username already exists!"
 msgstr "Ein Zugang mit diesem Benutzernamen existiert bereits!"
 
-#: omniportal.py:722 omniportal.py:788
+#: omniportal.py:756 omniportal.py:822
 msgid "Illegal parameters given!"
 msgstr "Ungültige Parameter angegeben!"
 
-#: omniportal.py:725
+#: omniportal.py:759
 msgid "An error occured! Creating employee account failed!"
 msgstr "Ein Fehler ist aufgetreten! Der Zugang wurde nicht erstellt!"
 
-#: omniportal.py:728
+#: omniportal.py:762
 msgid "The employee account was created!"
 msgstr "Der Mitarbeiterzugang wurde angelegt!"
 
-#: omniportal.py:791
+#: omniportal.py:825
 msgid "An error occured! Updating employee account failed!"
 msgstr "Ein Fehler ist aufgetreten! Der Zugang wurde nicht aktualisiert!"
 
-#: omniportal.py:794
+#: omniportal.py:828
 msgid "The employee account/password was updated!"
 msgstr "Der Mitarbeiterzugang wurde aktualisiert!"
 
-#: omniportal.py:847 omniportal.py:863 omniportal.py:879
+#: omniportal.py:881 omniportal.py:897 omniportal.py:913
 msgid "Change Employee Password"
 msgstr "Passwort ändern"
 
-#: omniportal.py:849 omniportal.py:852 omniportal.py:882 omniportal.py:886
-#: omniportal.py:909
+#: omniportal.py:883 omniportal.py:886 omniportal.py:916 omniportal.py:920
+#: omniportal.py:944
 msgid ""
 "Invalid email or change_token specified! This incident will be "
 "investigated!"
@@ -326,100 +357,118 @@ msgstr ""
 "Ungültige Emailadresse oder Sicherheitstoken verwendet! Dieser Vorfall "
 "wird geprüft!"
 
-#: omniportal.py:855 omniportal.py:889
+#: omniportal.py:889 omniportal.py:923
 msgid "There are no employees registered yet!"
 msgstr "Es sind noch keine Mitarbeiter registriert!"
 
-#: omniportal.py:859 omniportal.py:894
+#: omniportal.py:893 omniportal.py:928
 msgid "Request password change for employee"
 msgstr "Passwortänderung für Mitarbeiter anfordern"
 
-#: omniportal.py:904
+#: omniportal.py:939
 msgid "An email containing a link to change your password has been sent!"
 msgstr "Eine Email mit einem Link zur Passwortänderung wurde versendet!"
 
-#: omniportal.py:912
+#: omniportal.py:947
 msgid "Invalid route!"
 msgstr "Ungültiger Aufruf!"
 
-#: omniportal.py:990 omniportal.py:1059
+#: omniportal.py:1025 omniportal.py:1094
 msgid "An account with this username already exists!"
 msgstr "Ein Zugang mit diesem Benutzernamen existiert bereits!"
 
-#: omniportal.py:995 omniportal.py:1064
+#: omniportal.py:1030 omniportal.py:1099
 msgid "The guest account was created!"
 msgstr "Der Gastzugang wurde angelegt!"
 
-#: omniportal.py:1078 omniportal.py:1143 omniportal.py:1265
+#: omniportal.py:1113 omniportal.py:1178 omniportal.py:1300
 msgid "Guest Access to Stellar Wireless"
 msgstr "Gastzugang zu Stellar Wireless"
 
-#: omniportal.py:1079 omniportal.py:1171 omniportal.py:1293
+#: omniportal.py:1114 omniportal.py:1206 omniportal.py:1328
 msgid "Wi-Fi Network:"
 msgstr "Wi-Fi Netzwerk:"
 
-#: omniportal.py:1080 omniportal.py:1175 omniportal.py:1297
+#: omniportal.py:1115 omniportal.py:1210 omniportal.py:1332
 msgid "Username:"
 msgstr "Benutzername:"
 
-#: omniportal.py:1081 omniportal.py:1179 omniportal.py:1301
+#: omniportal.py:1116 omniportal.py:1214 omniportal.py:1336
 msgid "Password:"
 msgstr "Passwort:"
 
-#: omniportal.py:1082 omniportal.py:1183 omniportal.py:1305
+#: omniportal.py:1117 omniportal.py:1218 omniportal.py:1340
 msgid "Access valid until:"
 msgstr "Zugang gültig bis:"
 
-#: omniportal.py:1083 omniportal.py:1187 omniportal.py:1309
+#: omniportal.py:1118 omniportal.py:1222 omniportal.py:1344
 msgid "Your contact person:"
 msgstr "Ansprechpartner:"
 
-#: omniportal.py:1097
+#: omniportal.py:1132
 msgid "Failed to deliver to ALE VNA!"
 msgstr "Fehler bei der Verbindung zu ALE VNA!"
 
-#: omniportal.py:1212
+#: omniportal.py:1247
 msgid "Sending card via RingCentral webhook failed!"
 msgstr "Fehler bei der Verbindung zu RingCentral/Rainbow Office!"
 
-#: omniportal.py:1351
+#: omniportal.py:1386
 msgid "Valid From"
 msgstr "Gültig von"
 
-#: omniportal.py:1353 omniportal.py:1470
+#: omniportal.py:1388 omniportal.py:1505
 msgid "Actions"
 msgstr "Aktionen"
 
-#: omniportal.py:1429
+#: omniportal.py:1465
 msgid "An email containing a link to change the password has been sent!"
 msgstr "Eine Email mit einem Link zur Passwortänderung wurde versendet!"
 
-#: omniportal.py:1432 omniportal.py:1448 omniportal.py:1457
+#: omniportal.py:1468 omniportal.py:1483 omniportal.py:1492
 msgid "There was no account found for a user/employee with this email address!"
 msgstr ""
 "Es wurde kein Konto für einen Mitarbeiter mit dieser Emailadresse "
 "gefunden!"
 
-#: omniportal.py:1440
+#: omniportal.py:1476
 msgid "Successfully removed the employee from all databases!"
 msgstr "Der Mitarbeiter wurde erfolgreich aus allen Datenbanken entfernt!"
 
-#: omniportal.py:1443
+#: omniportal.py:1479
 msgid "Removing the employee account from OmniVista failed!"
 msgstr "Der Versuch den Mitarbeiter aus OmniVista zu löschen ist fehlgeschlagen!"
 
-#: omniportal.py:1445
+#: omniportal.py:1480
 #, python-format
 msgid "Click <a href=\"%(url)s\">here</a> to remove the local account only!"
-msgstr "<a href=\"%(url)s\">Hier</a> klicken um nur den lokalen Mitarbeiter zu entfernen!"
+msgstr ""
+"<a href=\"%(url)s\">Hier</a> klicken um nur den lokalen Mitarbeiter zu "
+"entfernen!"
 
-#: omniportal.py:1454
+#: omniportal.py:1489
 msgid "Successfully removed the employee from local database!"
 msgstr "Der Mitarbeiter wurde erfolgreich aus der lokalen Datenbank entfernt!"
 
-#: omniportal.py:1469
+#: omniportal.py:1504
 msgid "Last successful password change"
 msgstr "Letzte erfolgreiche Passwortänderung"
+
+#: omniportal.py:1534
+msgid "Configuration missing for SMTP server or email-from-address!"
+msgstr "Einstellung für SMTP Server oder Absendeadresse fehlt!"
+
+#: omniportal.py:1555
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: omniportal.py:1558
+msgid "OmniPortal Notification - Activate your account by setting your password"
+msgstr "OmniPortal Hinweis - Passwort festlegen und Zugang aktivieren"
+
+#: omniportal.py:1560
+msgid "OmniPortal Notification - Reset your password"
+msgstr "OmniPortal Hinweis - Passwort zurücksetzen"
 
 #: templates/add_employee.html:5 templates/add_employee.html:14
 #: templates/base.html:54
@@ -465,6 +514,39 @@ msgstr "Einstellungen"
 #: templates/base.html:68
 msgid "Log Out"
 msgstr "Abmelden"
+
+#: templates/email_forgot_password.html:12
+#: templates/email_forgot_password.txt:1 templates/email_new_user.html:12
+#: templates/email_new_user.txt:1
+msgid "Hello"
+msgstr "Hallo"
+
+#: templates/email_forgot_password.html:15
+#: templates/email_forgot_password.txt:3
+msgid "A password reset for your employee account was requested!"
+msgstr "Das Zurücksetzen des Passworts wurde angefordert!"
+
+#: templates/email_forgot_password.html:18
+#: templates/email_forgot_password.txt:6 templates/email_new_user.html:18
+#: templates/email_new_user.txt:6
+msgid "Wi-Fi Network"
+msgstr "Wi-Fi Netzwerk"
+
+#: templates/email_forgot_password.html:20
+#: templates/email_forgot_password.txt:8 templates/email_new_user.html:20
+#: templates/email_new_user.txt:8
+msgid "Please follow the link below to set your new password:"
+msgstr "Bitte dem folgenden Link folgen um das neue Passwort zu setzen:"
+
+#: templates/email_forgot_password.html:23
+#: templates/email_forgot_password.txt:11 templates/email_new_user.html:23
+#: templates/email_new_user.txt:11
+msgid "Your Alcatel-Lucent Enterprise team!"
+msgstr "Euer Alcatel-Lucent Enterprise Team!"
+
+#: templates/email_new_user.html:15 templates/email_new_user.txt:3
+msgid "A new employee account has been created for you!"
+msgstr "Ein neuer Mitarbeiterzugang wurde angelegt!"
 
 #: templates/index.html:11
 msgid "Welcome"

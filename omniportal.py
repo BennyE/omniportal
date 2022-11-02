@@ -809,7 +809,8 @@ def update_employee_account(username, ov_user_id, password):
         "id": ov_user_id,
         "repeat":password,
         "username":username,
-        "password":password
+        "password":password,
+        "description":"User managed by OmniPortal"
     }
     print(employee_data)
     resp_update_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/editAccount", headers=login_header, json=employee_data, verify=settings['check_certs'])
@@ -933,7 +934,7 @@ def employee_pw(user_email=None):
         if result:
             # TODO: Send mail
             # flash message
-            send_mail(request.form.get("email"))
+            send_mail(request.form.get("email"), action="forgot_password")
             print(url_for('employee_pw', user_email=request.form.get("email")))
             print(url_for('employee_pw', _external=True, user_email=request.form.get("email"), change_token=result))
             flash(_('An email containing a link to change your password has been sent!'), 'success')
@@ -1461,7 +1462,7 @@ def employee_accounts(user_email=None):
         if user_email in employee_data.keys():
             print(url_for('employee_pw', user_email=user_email))
             print(url_for('employee_pw', _external=True, user_email=user_email, change_token=employee_data[user_email]['change_token']))
-            send_mail(user_email)
+            send_mail(user_email, action="forgot_password")
             flash(_('An email containing a link to change the password has been sent!'), 'success')
             return redirect(url_for('employee_accounts'))
         else:
