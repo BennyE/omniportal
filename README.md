@@ -304,7 +304,9 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 17. ~~Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud~~ **DONE >= v0.0.6**
 18. Evaluate an escalation if password modifiction is attempted with wrong token
 19. Offer an option to set $TZ in container runtime to address for UTC vs. local time (e.g. CET / Europe/Berlin)
-20. Implement email notifications
+20. ~~Implement email notifications~~ **DONE >= v0.0.7**
+21. Review which options are there for k8s/traefik (ingress) HTTPS certificates
+22. Allow employees to self-register for an account (e.g. for given domains on allowlist)
 
 ## Screenshot
 
