@@ -81,7 +81,7 @@ You likely want to use a released version like `0.0.7` and not `0.0.7-dev.5`.
 That means you'll run the command like this:
 `podman run -dt --rm --name omniportal -v ~/omniportal_conf/:/usr/src/app/conf/ -p 5000:5000/tcp quay.io/bennye_hh/omniportal:0.0.7`
 
-The OmniPortal is afterwards accessible via http://<Your Raspberry Pi IP address>:5000/
+The OmniPortal is afterwards accessible via http://`Your Raspberry Pi IP address`:5000/
 
 ```
 pi@raspberrypi:~ $ podman run -dt --rm --name omniportal -v ~/omniportal_conf/:/usr/src/app/conf/ -p 5000:5000/tcp quay.io/bennye_hh/omniportal:0.0.7-dev.5
