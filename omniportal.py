@@ -94,13 +94,13 @@ class ChangeSettings(FlaskForm):
     employee_prefix = StringField(_l('Employee Prefix'), default=_l('employee_'))
     employee_wifi = StringField(_l('Employee Wi-Fi / SSID Name'))
     ove_ovc_url = URLField(_l('OmniVista 2500 NMS / OmniVista Cirrus URL'), default='https://tenant-name.ov.ovcirrus.com')
-    validate_ove_ovc_cert = RadioField(_l('Validate OmniVista 2500 NMS HTTPS certificate'), choices=[('yes', 'Yes'), ('no', 'No')], default='no')
+    validate_ove_ovc_cert = RadioField(_l('Validate OmniVista 2500 NMS HTTPS certificate'), choices=[('yes', _l('Yes')), ('no', _l('No'))], default='no')
     # Access via API key is currently not offered
     #ove_ovc_api_key = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus API Key'), widget=PasswordInput(hide_value=False))
     ove_ovc_username = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Username'))
     ove_ovc_password = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Password'), widget=PasswordInput(hide_value=False))
     smtp_server = StringField(_l('SMTP Server'))
-    smtp_auth = RadioField(_l('SMTP Authentication'), choices=[('yes', 'Yes'), ('no', 'No')], default='yes')
+    smtp_auth = RadioField(_l('SMTP Authentication'), choices=[('yes', _l('Yes')), ('no', _l('No'))], default='yes')
     smtp_port = IntegerField(_l('SMTP Port'), default=587)
     smtp_user = StringField(_l('SMTP User'))
     smtp_password = StringField(_l('SMTP Password'), widget=PasswordInput(hide_value=False))
@@ -353,7 +353,7 @@ def create_default_op_settings():
                 "ove_ovc_username": "",
                 "ove_ovc_password": "",
                 "smtp_server": "",
-                "smtp_auth": "",
+                "smtp_auth": "yes",
                 "smtp_port": "",
                 "smtp_user": "",
                 "smtp_password": "",
