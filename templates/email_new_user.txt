@@ -1,0 +1,11 @@
+{{ _('Hello') }} {{ new_user }},
+
+{{ _('A new employee account has been created for you!') }}
+
+{{ _('Username') }}: {{ username }}
+{{ _('Wi-Fi Network') }}: {{ employee_wifi }}
+
+{{ _('Please follow the link below to set your new password:') }}
+{{ link }}
+
+{{ _('Your Alcatel-Lucent Enterprise team!') }}

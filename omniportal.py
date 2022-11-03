@@ -94,11 +94,17 @@ class ChangeSettings(FlaskForm):
     employee_prefix = StringField(_l('Employee Prefix'), default=_l('employee_'))
     employee_wifi = StringField(_l('Employee Wi-Fi / SSID Name'))
     ove_ovc_url = URLField(_l('OmniVista 2500 NMS / OmniVista Cirrus URL'), default='https://tenant-name.ov.ovcirrus.com')
-    validate_ove_ovc_cert = RadioField(_l('Validate OmniVista 2500 NMS HTTPS certificate'), choices=[('yes', 'Yes'), ('no', 'No')], default='no')
+    validate_ove_ovc_cert = RadioField(_l('Validate OmniVista 2500 NMS HTTPS certificate'), choices=[('yes', _l('Yes')), ('no', _l('No'))], default='no')
     # Access via API key is currently not offered
     #ove_ovc_api_key = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus API Key'), widget=PasswordInput(hide_value=False))
     ove_ovc_username = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Username'))
     ove_ovc_password = StringField(_l('OmniVista 2500 NMS / OmniVista Cirrus Password'), widget=PasswordInput(hide_value=False))
+    smtp_server = StringField(_l('SMTP Server'))
+    smtp_auth = RadioField(_l('SMTP Authentication'), choices=[('yes', _l('Yes')), ('no', _l('No'))], default='yes')
+    smtp_port = IntegerField(_l('SMTP Port'), default=587)
+    smtp_user = StringField(_l('SMTP User'))
+    smtp_password = StringField(_l('SMTP Password'), widget=PasswordInput(hide_value=False))
+    email_from_address = StringField(_l('From: Email address'))
     submit = SubmitField(_l('Save Settings'))
     @classmethod
     def new(cls):
@@ -120,6 +126,12 @@ class ChangeSettings(FlaskForm):
             #form.ove_ovc_api_key.data = settings["ove_ovc_api_key"]
             form.ove_ovc_username.data = settings["ove_ovc_username"]
             form.ove_ovc_password.data = settings["ove_ovc_password"]
+            form.smtp_server.data = settings["smtp_server"]
+            form.smtp_auth.data = settings["smtp_auth"]
+            form.smtp_port.data = settings["smtp_port"]
+            form.smtp_user.data = settings["smtp_user"]
+            form.smtp_password.data = settings["smtp_password"]
+            form.email_from_address.data = settings["email_from_address"]
         except KeyError:
             pass
         return form
@@ -134,7 +146,8 @@ class AddGuestForm(FlaskForm):
 
 class AddEmployeeForm(FlaskForm):
     #username = StringField(_l('Username'), validators=[Regexp(r'^[0-9a-zA-Z/\.\-:_@\S]+$', message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(1, 32)])
-    email = StringField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    #email = StringField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    email = StringField(_l('Email'), validators=[Regexp(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', message=_l('The field requires a valid email-address.')), Length(4, 64)])
     #telephone = StringField(_l('Mobile'), validators=[DataRequired(message=_l('The field can only contain 0-9 +')), Length(4, 18)])
     submit = SubmitField(label=_l('Create Employee'))
 
@@ -151,13 +164,15 @@ class QuickGuestForm(FlaskForm):
     thirty_days = SubmitField(_l('30 Days'))
 
 class ChangeEmployeePasswordWithToken(FlaskForm):
-    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    email = StringField(_l('Email'), validators=[Regexp(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', message=_l('The field requires a valid email-address.')), Length(4, 64)])
+    #email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
     password = PasswordField(_l('New Password'), validators=[Regexp(r'^[ -~]+$', message=_l('The field can only contain ASCII characters 0x20-0x7E. Length 6-16 characters')), Length(6, 16)])
     change_token = HiddenField()
     submit = SubmitField(label=_l('Change Password'))
 
 class RequestEmployeePasswordChange(FlaskForm):
-    email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
+    email = StringField(_l('Email'), validators=[Regexp(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', message=_l('The field requires a valid email-address.')), Length(4, 64)])
+    #email = EmailField(_l('Email'), validators=[DataRequired(message=_l('The field can only contain 0-9 a-z A-Z / . - : _ @')), Length(4, 64)])
     submit = SubmitField(label=_l('Request Password Change Link'))
 
 @babel.localeselector
@@ -336,7 +351,13 @@ def create_default_op_settings():
                 "ove_ovc_url": "", 
                 "validate_ove_ovc_cert": "no", 
                 "ove_ovc_username": "",
-                "ove_ovc_password": ""
+                "ove_ovc_password": "",
+                "smtp_server": "",
+                "smtp_auth": "yes",
+                "smtp_port": "",
+                "smtp_user": "",
+                "smtp_password": "",
+                "email_from_address": ""
             }
             settings_fh.write(json.dumps(default_settings))
             os.chmod(op_settingsfile, 0o600)
@@ -360,7 +381,8 @@ def read_settings():
 
 def save_settings(guest_operator_url, guest_operator_username, guest_operator_password, guest_prefix, wifi_network,
                     ale_rainbow_webhook, ringcentral_webhook, ms_teams_webhook, ove_ovc_url, validate_ove_ovc_cert,
-                    employee_wifi, employee_prefix, ove_ovc_username, ove_ovc_password):
+                    employee_wifi, employee_prefix, ove_ovc_username, ove_ovc_password,
+                    smtp_server, smtp_auth, smtp_port, smtp_user, smtp_password, email_from_address):
     with open(op_settingsfile, "w") as settings:
         setting = {}
         setting["guest_operator_url"] = guest_operator_url.rstrip("/")
@@ -378,6 +400,12 @@ def save_settings(guest_operator_url, guest_operator_username, guest_operator_pa
         setting["employee_prefix"] = employee_prefix
         setting["ove_ovc_username"] = ove_ovc_username
         setting["ove_ovc_password"] = ove_ovc_password
+        setting["smtp_server"] = smtp_server
+        setting["smtp_auth"] = smtp_auth
+        setting["smtp_port"] = smtp_port
+        setting["smtp_user"] = smtp_user
+        setting["smtp_password"] = smtp_password
+        setting["email_from_address"] = email_from_address
         settings.write(json.dumps(setting))
     return True
 
@@ -440,7 +468,13 @@ def admin():
                          request.form["employee_wifi"],
                          request.form["employee_prefix"],
                          request.form["ove_ovc_username"],
-                         request.form["ove_ovc_password"]
+                         request.form["ove_ovc_password"],
+                         request.form["smtp_server"],
+                         request.form["smtp_auth"],
+                         request.form["smtp_port"],
+                         request.form["smtp_user"],
+                         request.form["smtp_password"],
+                         request.form["email_from_address"]
                          ):
             flash(_('The settings were saved!'), 'success')
             return redirect(url_for('index'))
@@ -775,7 +809,8 @@ def update_employee_account(username, ov_user_id, password):
         "id": ov_user_id,
         "repeat":password,
         "username":username,
-        "password":password
+        "password":password,
+        "description":"User managed by OmniPortal"
     }
     print(employee_data)
     resp_update_employee = req.post(f"{settings['ove_ovc_url']}/api/ham/userAccount/editAccount", headers=login_header, json=employee_data, verify=settings['check_certs'])
@@ -899,6 +934,7 @@ def employee_pw(user_email=None):
         if result:
             # TODO: Send mail
             # flash message
+            send_mail(request.form.get("email"), action="forgot_password")
             print(url_for('employee_pw', user_email=request.form.get("email")))
             print(url_for('employee_pw', _external=True, user_email=request.form.get("email"), change_token=result))
             flash(_('An email containing a link to change your password has been sent!'), 'success')
@@ -1426,6 +1462,7 @@ def employee_accounts(user_email=None):
         if user_email in employee_data.keys():
             print(url_for('employee_pw', user_email=user_email))
             print(url_for('employee_pw', _external=True, user_email=user_email, change_token=employee_data[user_email]['change_token']))
+            send_mail(user_email, action="forgot_password")
             flash(_('An email containing a link to change the password has been sent!'), 'success')
             return redirect(url_for('employee_accounts'))
         else:
@@ -1486,5 +1523,139 @@ def add_employee():
                 return render_template("add_employee.html", form=form)
             #create_employee_account(request.form.get('username'), request.form.get('email'), request.form.get('telephone'))
             create_employee_account(request.form.get('email'))
+            send_mail(request.form.get('email'))
             return redirect(url_for('add_employee'))
     return render_template("add_employee.html", form=form)
+
+def send_mail(user_email, action="new_employee"):
+
+    settings = read_settings()
+
+    if settings['smtp_server'] == "" or settings['email_from_address'] == "":
+        flash(_('Configuration missing for SMTP server or email-from-address!'), 'danger')        
+        return False
+
+    # email_from, email_to, ssid_name, ga_username, ga_password, ga_valid_until, language,
+    # smtp_server, smtp_auth, smtp_user, smtp_port, smtp_password
+
+    # dev
+    #email_to = settings['email_from_address']
+    # prod
+    email_to = user_email
+
+    # apply settings
+    email_from = settings['email_from_address']
+    smtp_server = settings['smtp_server']
+    smtp_port = settings['smtp_port']
+    smtp_auth = settings['smtp_auth']
+    smtp_user = settings['smtp_user']
+    smtp_password = settings['smtp_password']
+
+    employee_wifi = settings['employee_wifi']
+    if employee_wifi == "":
+        employee_wifi = _("Unknown")
+
+    if action == "new_employee":
+        mail_subject = _("OmniPortal Notification - Activate your account by setting your password")
+    elif action == "forgot_password":
+        mail_subject = _("OmniPortal Notification - Reset your password")
+    else:
+        return False
+
+    # TODO:
+    # - Decide if there are separate functions for each action or some other logic
+
+    # Send an HTML email with an embedded image and a plain text message for
+    # email clients that don't want to display the HTML.
+
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.image import MIMEImage
+
+    # Define these once; use them twice!
+    strFrom = email_from
+    strTo = email_to
+
+    # Create the root message and fill in the from, to, and subject headers
+    msgRoot = MIMEMultipart('related')
+    msgRoot['Subject'] = mail_subject
+
+    msgRoot['From'] = strFrom
+    msgRoot['To'] = strTo
+    msgRoot.preamble = 'This is a multi-part message in MIME format.'
+
+    # Encapsulate the plain and HTML versions of the message body in an
+    # 'alternative' part, so message agents can decide which they want to display.
+    msgAlternative = MIMEMultipart('alternative')
+    msgRoot.attach(msgAlternative)
+
+    # Generate an UUID for uniqe attachment Content-IDs
+    # We don't need this for this module and will save some system resources
+    #content_id = "abcdefg"
+
+    # Read the details about our new user
+    employee_data = read_employees_file()
+    if user_email in employee_data.keys():
+        username = employee_data[user_email]['user_id']
+        link = url_for('employee_pw', _external=True, user_email=user_email, change_token=employee_data[user_email]['change_token'])
+    else:
+        return False
+
+    if action == "new_employee":
+        plain_content = render_template("email_new_user.txt", new_user=user_email, username=username, link=link, employee_wifi=employee_wifi)
+        html_content = render_template("email_new_user.html", new_user=user_email, username=username, link=link, employee_wifi=employee_wifi)
+    elif action == "forgot_password":
+        plain_content = render_template("email_forgot_password.txt", new_user=user_email, username=username, link=link, employee_wifi=employee_wifi)
+        html_content = render_template("email_forgot_password.html", new_user=user_email, username=username, link=link, employee_wifi=employee_wifi)
+    else:
+        return False
+
+    # PLAINTEXT
+    print(plain_content)
+
+    # HTML
+    print(html_content)
+
+    msgText = MIMEText(plain_content)
+    
+    msgAlternative.attach(msgText)
+
+    # We reference the image in the IMG SRC attribute by the ID we give it below
+    msgText = MIMEText(html_content, 'html')
+    msgAlternative.attach(msgText)
+
+    # ALE Logo
+    fp = open('static/al_enterprise_bk_50mm.png', 'rb')
+    msgImage = MIMEImage(fp.read())
+    fp.close()
+
+    # Define the image's ID as referenced above
+    # Avoid that the mail client can cache a previous QR code by giving a custom name
+    msgImage.add_header('Content-ID', '<image1>')
+    msgRoot.attach(msgImage)
+
+    # Stellar Logo
+    fp = open('static/stellar-logo.png', 'rb')
+    msgImage = MIMEImage(fp.read())
+    fp.close()
+
+    # Define the image's ID as referenced above
+    # Avoid that the mail client can cache a previous QR code by giving a custom name
+    msgImage.add_header('Content-ID', '<image2>')
+    msgRoot.attach(msgImage)
+
+    # Send the email
+    import smtplib
+    # Fix for issue # 2 - Python3 SMTP ValueError: server_hostname cannot be an empty string or start with a leading dot 
+    smtp = smtplib.SMTP(host=smtp_server, port=smtp_port)
+    smtp.set_debuglevel(0)
+    smtp.connect(host=smtp_server, port=smtp_port)
+
+    if smtp_auth == "yes":
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(smtp_user, smtp_password)
+        result = smtp.sendmail(strFrom, strTo, msgRoot.as_string())
+        print(result)
+    else:
+        result = smtp.sendmail(strFrom, strTo, msgRoot.as_string())

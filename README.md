@@ -52,7 +52,7 @@ You'll find the files that store the configuration/settings in **/home/$USER/omn
 
 `sudo docker stop omniportal`
 
-### Run OmniPortal (my image) from Quay.io
+### Run OmniPortal (my image) from Quay.io with Docker
 
 You'll find the files that store the configuration/settings in **/home/$USER/omniportal_conf/**
 
@@ -61,6 +61,70 @@ You'll find the files that store the configuration/settings in **/home/$USER/omn
 #### Stop OmniPortal-Docker
 
 `sudo docker stop omniportal`
+
+### Run OmniPortal (my image) from Quay.io with Podman
+
+This describes how you can run OmniPortal from Quay.io with Podman on Raspberry Pi (Raspberry Pi OS - Bullseye)
+
+#### Install Podman
+
+`pi@raspberrypi:~ $ sudo apt install podman`
+
+#### Create configuration directory
+
+`pi@raspberrypi:~ $ mkdir ~/omniportal_conf`
+
+#### Start OmniPortal
+
+You likely want to use a released version like `0.0.7` and not `0.0.7-dev.5`.
+
+That means you'll run the command like this:
+`podman run -dt --rm --name omniportal -v ~/omniportal_conf/:/usr/src/app/conf/ -p 5000:5000/tcp quay.io/bennye_hh/omniportal:0.0.7`
+
+The OmniPortal is afterwards accessible via http://`Your Raspberry Pi IP address`:5000/
+
+```
+pi@raspberrypi:~ $ podman run -dt --rm --name omniportal -v ~/omniportal_conf/:/usr/src/app/conf/ -p 5000:5000/tcp quay.io/bennye_hh/omniportal:0.0.7-dev.5
+Trying to pull quay.io/bennye_hh/omniportal:0.0.7-dev.5...
+Getting image source signatures
+Copying blob c6556b3b6858 done  
+Copying blob 6fcb34aff92a done  
+Copying blob cc847055b6ed done  
+Copying blob eb59b4321d1a done  
+Copying blob 8e3ee81ebede done  
+Copying blob 62a9257cdbac done  
+Copying blob 627e3277a97e done  
+Copying blob 3a27312b5662 done  
+Copying blob c626bb6f5f66 done  
+Copying blob 8fc6102b0b82 done  
+Copying config 82b5820d55 done  
+Writing manifest to image destination
+Storing signatures
+66ba1a2dd3bb00e1e56ae34ccf42e065d496cc0a38a8e8a23155a0118ddd6e39
+```
+
+#### Podman: List images
+
+```
+pi@raspberrypi:~ $ podman images
+REPOSITORY                    TAG          IMAGE ID      CREATED       SIZE
+quay.io/bennye_hh/omniportal  0.0.7-dev.5  82b5820d557c  17 hours ago  126 MB
+```
+
+#### Podman: List running containers
+
+```
+pi@raspberrypi:~ $ podman ps
+CONTAINER ID  IMAGE                                     COMMAND          CREATED        STATUS            PORTS                   NAMES
+66ba1a2dd3bb  quay.io/bennye_hh/omniportal:0.0.7-dev.5  ./entrypoint.sh  4 minutes ago  Up 4 minutes ago  0.0.0.0:5000->5000/tcp  omniportal
+```
+
+#### Podman: Stop the container
+
+```
+pi@raspberrypi:~ $ podman stop -l
+66ba1a2dd3bb00e1e56ae34ccf42e065d496cc0a38a8e8a23155a0118ddd6e39
+```
 
 ### Run OmniPortal in Rancher Desktop / k3s / k8s
 
@@ -283,28 +347,45 @@ Edit the **messages.po** in the **translations/de/LC_MESSAGES** or e.g. **transl
 
 `.venv/bin/pybabel compile -d translations`
 
-## TODO & Ideas to be evaluated
+## Ideas to be evaluated
 
-1. ~~"Guest" and "Admin"-role are the two only roles taken into account so far~~ **DONE >= v0.0.6** `BREAKING-CHANGE`
-2. There is no logic yet that handles "running on OmniSwitch with AOS R8"
-3. No Adaptive Card is sent yet after creating the Employee account
-4. Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
-5. The code could need some structuring into multiple files
-6. Possibly it would make sense to move to sqlite instead of JSON files, to be evaluated later
-7. ~~Create app.secret_key, omniportal_users & omniportal_settings automatically if those don't exist and store in conf directory~~ **DONE >= v0.0.2**
-8. ~~Create Dockerfile & distribute via Quay.io~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
-9. ~~Figure out how to setup & deploy OmniPortal to Rancher Desktop (k3s/k8s)~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
-10. ~~Setup fully automated GitHub Actions Workflow for multi-architecture container images~~ **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
-11. ~~Store OmniPortal passwords only as a hash~~ **DONE >= v0.0.6** `BREAKING-CHANGE`
-12. Integrate with Grafana/Prometheus
-13. ~~Update Dockerfile to do `apt update`, `apt dist-upgrade` & `apt clean` to collect latest updates~~ **DONE >= v0.0.3**
-14. ~~Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest~~ **DONE >= v0.0.3** 
-15. ~~Switch to Python v3.9 Alpine Linux image to make the security scanner of Quay.io happy~~ **DONE >= v0.0.4**
-16. Update function for undesireable words in username/password
-17. ~~Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud~~ **DONE >= v0.0.6**
-18. Evaluate an escalation if password modifiction is attempted with wrong token
-19. Offer an option to set $TZ in container runtime to address for UTC vs. local time (e.g. CET / Europe/Berlin)
-20. Implement email notifications
+- There is no logic yet that handles "running on OmniSwitch with AOS R8"
+- No Adaptive Card is sent yet after creating the Employee account
+- The code could need some structuring into multiple files
+- Possibly it would make sense to move to sqlite instead of JSON files, to be evaluated later
+- Integrate with Grafana/Prometheus
+- Review which options are there for k8s/traefik (ingress) HTTPS certificates
+- Avaya OneCloud CPaaS (for e.g. SMS) is not implemented yet
+
+## TODO (next)
+
+- Buttons in "guest-accounts"-overview should be functional
+- Evaluate an escalation if password modifiction is attempted with wrong token
+- Allow employees to self-register for an account (e.g. for given domains on allowlist)
+- Update functions for undesireable words in username/password
+- Offer an option to set $TZ in container runtime to address for UTC vs. local time (e.g. CET / Europe/Berlin)
+
+### v0.0.7
+
+- Implement email notifications **DONE >= v0.0.7**
+- i18n for email-notifications (for EN/DE) **DONE >= v0.0.7**
+- Added "podman" instructions and example on how to run OmniPortal on Raspberry Pi
+
+### v0.0.6
+
+- "Guest" and "Admin"-role are the two only roles taken into account so far `BREAKING-CHANGE` **DONE >= v0.0.6**
+- Rework employee module to allow creation of employee-users which are stored with a pseudo-account in cloud **DONE >= v0.0.6**
+- Store OmniPortal passwords only as a hash **DONE >= v0.0.6** `BREAKING-CHANGE`
+
+### v0.0.1 - v0.0.5
+
+- Switch to Python v3.9 Alpine Linux image to make the security scanner of Quay.io happy **DONE >= v0.0.4**
+- Update Dockerfile to do `apt update`, `apt dist-upgrade` & `apt clean` to collect latest updates **DONE >= v0.0.3**
+- Update deployment-omniportal.yaml to a given version e.g. :0.0.3 instead of :latest **DONE >= v0.0.3** 
+- Create app.secret_key, omniportal_users & omniportal_settings automatically if those don't exist and store in conf directory **DONE >= v0.0.2**
+- Create Dockerfile & distribute via Quay.io **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
+- Figure out how to setup & deploy OmniPortal to Rancher Desktop (k3s/k8s) **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
+- Setup fully automated GitHub Actions Workflow for multi-architecture container images **DONE >= v0.0.2** (Thanks to ![dgo19](https://github.com/dgo19) for the help!)
 
 ## Screenshot
 
